@@ -2,6 +2,7 @@ import random
 
 
 # Runs a game of Blackjack
+#TODO: Import and use Questionary and possibly Rich
 def main():
     print("Welcome to Blackjack!")
 
