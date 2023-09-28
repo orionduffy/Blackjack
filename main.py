@@ -1,25 +1,28 @@
 import random
+import questionary
 
 
 # Runs a game of Blackjack
-#TODO: Import and use Questionary and possibly Rich
 def main():
     print("Welcome to Blackjack!")
 
     player_money = 100
-    choice = ""
+    # Choices listed here because hardcoding is bad
+    choices = ["Continue", "Quit"]
+    choice = choices[0]
 
-    while player_money > 0 and choice != "q":
-        bet = 0
-        while bet == 0:
-            try:
-                bet_input = input(f"You have ${player_money}. Please choose how much you'd like to bet: ")
-                bet = int(bet_input)
-                if bet > player_money:
-                    print("Error! Bet is too much! You don't have that much money!")
-                    bet = 0
-            except ValueError:
-                print("Error! Invalid input! Must be a number!")
+    def validate_bet(text):
+        try:
+            bet = int(text)
+            if bet > player_money:
+                return "You don't have that much money! Please enter a lower amount"
+            return True
+        except ValueError:
+            return "Please enter a number"
+
+    while player_money > 0 and choice == choices[0]:
+        print(f"You have ${player_money} to bet with!")
+        bet = int(questionary.text("How much would you like to bet?", validate=validate_bet).ask())
 
         player_money -= bet
         print(f"${bet} will be bet! You have ${player_money} left in reserve! Beginning game!")
@@ -28,15 +31,10 @@ def main():
 
         player_money += bet * multiplier
         player_money = int(player_money)
-
-        choice = ""
-        while (choice != "q" and choice != "c") and player_money > 0:
-            choice = input("Would you like to quit now (q), or continue (c)? ")
-            if choice != "q" and choice != "c":
-                print(f"Error! Response must be \"q\" or \"c\"! You typed: {choice}")
+        if player_money > 0:
+            choice = questionary.select("What do you want to do?", choices=choices).ask()
 
     print(f"Thank you for playing. You left with ${player_money}")
-
 
 
 # Runs the core game loop
@@ -52,9 +50,11 @@ def play_blackjack():
     player_cards = []
     dealer_cards = []
 
-    choice = ""
+    # Choices listed here because hardcoding is bad
+    choices = ["Draw two more cards", "Keep your current cards"]
+    choice = choices[0]
 
-    while choice != "k":
+    while choice == choices[0]:
 
         for i in range(2):
             player_cards.append(deck.pop(0))
@@ -71,11 +71,7 @@ def play_blackjack():
         if bust(player_cards) or bust(dealer_cards):
             break
 
-        choice = ""
-        while choice != "k" and choice != "d":
-            choice = input("Would you like to keep your cards (k), or draw again (d)? ")
-            if choice != "k" and choice != "d":
-                print(f"Error! Response must be \"k\" or \"d\"! You typed: {choice}")
+        choice = questionary.select("What do you want to do?", choices=choices).ask()
 
     print("Game over!")
     return game_end(player_cards, dealer_cards)
@@ -105,6 +101,7 @@ def game_end(player_cards, dealer_cards):
         player_won = 2.5
 
     return player_won
+
 
 # Returns TRUE if user went bust
 def bust(cards):
