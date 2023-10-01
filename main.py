@@ -1,3 +1,4 @@
+
 import random
 import questionary
 
@@ -157,3 +158,34 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"Exception occurred: {e}")
         # TODO: Finish this
+
+
+
+
+# Nahom-dev 
+# this deck of cards is initiated at the start of the game is kept through out the game
+def start_deck():
+    card_types = ['\u2663', '\u2660', '\u2665', '\u2666']
+    card_num = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
+    value = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+    deck = {card_num[j] + n: value[j] for n in card_types for j in range(len(card_num))}
+
+    return deck
+
+# https://pynative.com/python-random-shuffle/#:~:text=Shuffling%20a%20dictionary%20is%20not,dictionary%20values%20using%20shuffled%20keys.
+#  This function is used to shuffle the deck of cards dictionary and is called after every new game
+def shuffle_deck(deck):
+     keys = list(deck.keys())
+     random.shuffle(keys)
+     return keys   
+
+# This method accept the deck keys only and it figures thier values by itself and calculates the sum
+def sum_cards(player_cards):
+    values = [deck[x] for x in player_cards]
+    Sum = sum(values)
+    aces = values.count(11)
+    for i in range(aces):
+        if Sum > 21:
+            Sum -=10
+    
+    return Sum
