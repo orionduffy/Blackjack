@@ -61,48 +61,62 @@ def play_blackjack():
     for i in range(2):
         dealer_cards.append(deck.pop(0))
 
-    print(f"Dealer's first card: {dealer_cards[0]}")
+    print(f"Dealer's up card: {dealer_cards[0]} ({base_deck[dealer_cards[0]]} points)")
     print(f"Your cards: {player_cards}")
     print(f"Sum: {sum_cards(player_cards)}")
 
-    # Choices listed here because hardcoding is bad
-    choices = ["Hit (Draw another card)",
-               "Stand (Keep your current hand)",
-               "Double (Double your original bet and get only 1 more card)",
-               "Surrender (Give up and get half your bet back)"
-               ]
-    choice = questionary.select("What do you want to do?", choices=choices).ask()
+    if sum_cards(dealer_cards) != 21 and sum_cards(player_cards) != 21:
+        # Choices listed here because hardcoding is bad
+        choices = ["Hit (Draw another card)",
+                   "Stand (Keep your current hand)",
+                   "Double (Double your original bet and get only 1 more card)",
+                   "Surrender (Give up and get half your bet back)"
+                   ]
+        choice = questionary.select("What do you want to do?", choices=choices).ask()
 
-    while choice == choices[0]:
+        while choice == choices[0]:
 
-        player_cards.append(deck.pop(0))
+            player_cards.append(deck.pop(0))
 
-        print(f"Your cards: {player_cards}")
-        print(f"Sum: {sum_cards(player_cards)}")
+            print(f"Your cards: {player_cards}")
+            print(f"Sum: {sum_cards(player_cards)}")
 
-        if sum_cards(player_cards) > 21:
-            break
+            if sum_cards(player_cards) > 21:
+                break
 
-        choice = questionary.select("What do you want to do next?", choices=choices[:-2]).ask()
+            choice = questionary.select("What do you want to do next?", choices=choices[:-2]).ask()
 
-    if choice == choices[2]:
-        player_cards.append(deck.pop(0))
+        if choice == choices[2]:
+            player_cards.append(deck.pop(0))
 
-        print(f"Your cards: {player_cards}")
-        print(f"Sum: {sum_cards(player_cards)}")
+            print(f"Your cards: {player_cards}")
+            print(f"Sum: {sum_cards(player_cards)}")
 
-    if sum_cards(player_cards) <= 21:
-        while sum_cards(dealer_cards) < 17:
-            dealer_cards.append(deck.pop(0))
+        if sum_cards(player_cards) <= 21 and choice != choices[-1]:
+            print("The dealer now flips over their hole card.")
+            print(f"Dealer cards: {dealer_cards}")
+            print(f"Dealer sum: {sum_cards(dealer_cards)}")
 
-    print("Game over!")
-    return game_end(player_cards, dealer_cards, choices.index(choice))
+            if sum_cards(dealer_cards) < 17:
+                print("The dealer has less than 17 points. he begins drawing.")
+
+            while sum_cards(dealer_cards) < 17:
+                dealer_cards.append(deck.pop(0))
+                print(f"Dealer cards: {dealer_cards}")
+                print(f"Dealer sum: {sum_cards(dealer_cards)}")
+
+        print("Game over!")
+        return game_end(player_cards, dealer_cards, choices.index(choice))
+    else:
+        print("Game immediately over!")
+        return blackjack_end(player_cards, dealer_cards)
 
 
 def game_end(player_cards, dealer_cards, special=0):
     player_won = 0
     print(f"The dealer has {sum_cards(dealer_cards)} points and the player has {sum_cards(player_cards)} points!")
     if special == 3:
+        print("The player chose to surrender! They get half their bet back!")
         player_won = -0.5
     elif sum_cards(player_cards) > 21:
         print("The player went bust! The player lost!")
@@ -120,12 +134,24 @@ def game_end(player_cards, dealer_cards, special=0):
         print("The player has less points than the dealer! The dealer won!")
         player_won = -1
 
-    if player_won == 1 and sum(player_cards) == 21:
-        print("Additionally, the player got blackjack! Earnings increased!")
-        player_won *= 1.5
-
     if special == 2:
         player_won *= 2
+
+    return player_won
+
+
+def blackjack_end(player_cards, dealer_cards):
+    player_won = 0
+
+    if sum_cards(player_cards) == 21 and sum_cards(dealer_cards) == 21:
+        print("The player and dealer both have a blackjack! A push occurred!")
+        player_won = 0
+    elif sum_cards(dealer_cards) == 21:
+        print("The dealer has a blackjack! Any player who does not have a blackjack has instantly lost!")
+        player_won = -1
+    elif sum_cards(player_cards) == 21:
+        print("The player has a blackjack and the dealer does not! The player gets payed out 3 to 2!")
+        player_won = 2.5
 
     return player_won
 
