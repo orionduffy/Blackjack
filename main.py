@@ -1,6 +1,12 @@
-
 import random
 import questionary
+
+# Nahom-dev
+card_types = ['\u2663', '\u2660', '\u2665', '\u2666']
+card_num = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
+value = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+# this deck of cards is initiated at the start of the session and is not used in play. A deck of keys is used instead.
+base_deck = {card_num[j] + n: value[j] for n in card_types for j in range(len(card_num))}
 
 
 # Runs a game of Blackjack
@@ -39,19 +45,12 @@ def main():
         if player_money >= min_bet:
             choice = questionary.select("What do you want to do?", choices=choices).ask()
 
-
     print(f"Thank you for playing. You left with ${player_money}")
 
 
 # Runs the core game loop
 def play_blackjack():
-    deck = []
-    for i in range(4):
-        deck += [i for i in range(1, 12)]
-    for i in range(8):
-        deck.append(10)
-
-    random.shuffle(deck)
+    deck = shuffle_deck(base_deck)
 
     player_cards = []
     dealer_cards = []
@@ -64,7 +63,7 @@ def play_blackjack():
 
     print(f"Dealer's first card: {dealer_cards[0]}")
     print(f"Your cards: {player_cards}")
-    print(f"Sum: {sum(player_cards)}")
+    print(f"Sum: {sum_cards(player_cards)}")
 
     # Choices listed here because hardcoding is bad
     choices = ["Hit (Draw another card)",
@@ -78,27 +77,23 @@ def play_blackjack():
 
         player_cards.append(deck.pop(0))
 
-        bust(player_cards)
-
         print(f"Your cards: {player_cards}")
-        print(f"Sum: {sum(player_cards)}")
+        print(f"Sum: {sum_cards(player_cards)}")
 
-        if bust(player_cards):
+        if sum_cards(player_cards) > 21:
             break
 
-        choice = questionary.select("What do you want to do next?", choices=choices[:-1]).ask()
+        choice = questionary.select("What do you want to do next?", choices=choices[:-2]).ask()
 
     if choice == choices[2]:
         player_cards.append(deck.pop(0))
-        bust(player_cards)
 
         print(f"Your cards: {player_cards}")
-        print(f"Sum: {sum(player_cards)}")
+        print(f"Sum: {sum_cards(player_cards)}")
 
-    if not bust(player_cards):
-        while sum(dealer_cards) < 17:
+    if sum_cards(player_cards) <= 21:
+        while sum_cards(dealer_cards) < 17:
             dealer_cards.append(deck.pop(0))
-            bust(dealer_cards)
 
     print("Game over!")
     return game_end(player_cards, dealer_cards, choices.index(choice))
@@ -106,22 +101,22 @@ def play_blackjack():
 
 def game_end(player_cards, dealer_cards, special=0):
     player_won = 0
-    print(f"The dealer has {sum(dealer_cards)} points and the player has {sum(player_cards)} points!")
+    print(f"The dealer has {sum_cards(dealer_cards)} points and the player has {sum_cards(player_cards)} points!")
     if special == 3:
         player_won = -0.5
-    elif bust(player_cards):
+    elif sum_cards(player_cards) > 21:
         print("The player went bust! The player lost!")
         player_won = -1
-    elif bust(dealer_cards):
+    elif sum_cards(dealer_cards) > 21:
         print("The dealer went bust! The player won!")
         player_won = 1
-    elif sum(player_cards) == sum(dealer_cards):
+    elif sum_cards(player_cards) == sum_cards(dealer_cards):
         print("The player and dealer have the same number of points! A push occurred!")
         player_won = 0
-    elif sum(player_cards) > sum(dealer_cards):
+    elif sum_cards(player_cards) > sum_cards(dealer_cards):
         print("The player has more points than the dealer! The player won!")
         player_won = 1
-    elif sum(player_cards) < sum(dealer_cards):
+    elif sum_cards(player_cards) < sum_cards(dealer_cards):
         print("The player has less points than the dealer! The dealer won!")
         player_won = -1
 
@@ -135,19 +130,25 @@ def game_end(player_cards, dealer_cards, special=0):
     return player_won
 
 
-# Returns TRUE if user went bust
-def bust(cards):
-    if sum(cards) > 21:
-        while 11 in cards:
-            cards[cards.index(11)] = 1
-            if sum(cards) <= 21:
-                break
-        if sum(cards) <= 21:
-            return False
-        else:
-            return True
-    else:
-        return False
+# https://pynative.com/python-random-shuffle/#:~:text=Shuffling%20a%20dictionary%20is%20not,dictionary%20values%20using%20shuffled%20keys.
+#  This function is used to shuffle the deck of cards dictionary and is called after every new game
+def shuffle_deck(deck):
+    keys = list(deck.keys())
+    random.shuffle(keys)
+    return keys
+
+
+# This method accept the deck keys only and it figures their values by itself and calculates the sum
+def sum_cards(cards):
+    values = [base_deck[card] for card in cards]
+    point_sum = sum(values)
+    aces = values.count(11)
+
+    for i in range(aces):
+        if point_sum > 21:
+            point_sum -= 10
+
+    return point_sum
 
 
 if __name__ == '__main__':
@@ -158,34 +159,3 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"Exception occurred: {e}")
         # TODO: Finish this
-
-
-
-
-# Nahom-dev 
-# this deck of cards is initiated at the start of the game is kept through out the game
-def start_deck():
-    card_types = ['\u2663', '\u2660', '\u2665', '\u2666']
-    card_num = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
-    value = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
-    deck = {card_num[j] + n: value[j] for n in card_types for j in range(len(card_num))}
-
-    return deck
-
-# https://pynative.com/python-random-shuffle/#:~:text=Shuffling%20a%20dictionary%20is%20not,dictionary%20values%20using%20shuffled%20keys.
-#  This function is used to shuffle the deck of cards dictionary and is called after every new game
-def shuffle_deck(deck):
-     keys = list(deck.keys())
-     random.shuffle(keys)
-     return keys   
-
-# This method accept the deck keys only and it figures thier values by itself and calculates the sum
-def sum_cards(player_cards):
-    values = [deck[x] for x in player_cards]
-    Sum = sum(values)
-    aces = values.count(11)
-    for i in range(aces):
-        if Sum > 21:
-            Sum -=10
-    
-    return Sum
