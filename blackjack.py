@@ -43,19 +43,22 @@ class Blackjack:
         self.player_cards = []
         self.dealer_cards = []
 
+    def print_player_info(self):
+        print(f"Your cards: {self.player_cards} \nPlayer Sum: {self.deck.sum_cards(self.player_cards)}")
+    
+    def print_dealer_info(self):
+        print(f"Dealer cards: {self.dealer_cards} \nDealer sum: {self.deck.sum_cards(self.dealer_cards)}")
+
     # Runs the loop for an individual rounds,
     # which at a basic level involves drawing new cards until the player stops or goes over 21
     def run_round(self):
 
-        for i in range(2):
+        for i in range(2): 
             self.player_cards.append(self.shuffled_deck.pop(0))
-
-        for i in range(2):
             self.dealer_cards.append(self.shuffled_deck.pop(0))
 
         print(f"Dealer's up card: {self.dealer_cards[0]} ({self.deck.base_deck[self.dealer_cards[0]]} points)")
-        print(f"Your cards: {self.player_cards}")
-        print(f"Sum: {self.deck.sum_cards(self.player_cards)}")
+        self.print_player_info()
 
         if self.deck.sum_cards(self.dealer_cards) != 21 and self.deck.sum_cards(self.player_cards) != 21:
             # Choices listed here because hardcoding is bad
@@ -69,33 +72,26 @@ class Blackjack:
             while choice == choices[0]:
 
                 self.player_cards.append(self.shuffled_deck.pop(0))
+                self.print_player_info()
 
-                print(f"Your cards: {self.player_cards}")
-                print(f"Sum: {self.deck.sum_cards(self.player_cards)}")
-
-                if self.deck.sum_cards(self.player_cards) > 21:
+                if self.deck.sum_cards(self.player_cards) > 21: 
                     break
 
                 choice = questionary.select("What do you want to do next?", choices=choices[:-2]).ask()
 
             if choice == choices[2]:
                 self.player_cards.append(self.shuffled_deck.pop(0))
-
-                print(f"Your cards: {self.player_cards}")
-                print(f"Sum: {self.deck.sum_cards(self.player_cards)}")
+                self.print_player_info()
 
             if self.deck.sum_cards(self.player_cards) <= 21 and choice != choices[-1]:
                 print("The dealer now flips over their hole card.")
-                print(f"Dealer cards: {self.dealer_cards}")
-                print(f"Dealer sum: {self.deck.sum_cards(self.dealer_cards)}")
+                self.print_dealer_info()
 
                 if self.deck.sum_cards(self.dealer_cards) < 17:
                     print("The dealer has less than 17 points. he begins drawing.")
-
-                while self.deck.sum_cards(self.dealer_cards) < 17:
-                    self.dealer_cards.append(self.shuffled_deck.pop(0))
-                    print(f"Dealer cards: {self.dealer_cards}")
-                    print(f"Dealer sum: {self.deck.sum_cards(self.dealer_cards)}")
+                    while self.deck.sum_cards(self.dealer_cards) < 17:
+                        self.dealer_cards.append(self.shuffled_deck.pop(0))
+                    self.print_dealer_info()
 
             print("Game over!")
             return self.game_end(choices.index(choice))
@@ -107,24 +103,25 @@ class Blackjack:
     # Handles a normal ending of the game
     def game_end(self, special=0):
         player_won = 0
-        print(
-            f"The dealer has {self.deck.sum_cards(self.dealer_cards)} points and the player has {self.deck.sum_cards(self.player_cards)} points!")
+        dealer_sum = self.deck.sum_cards(self.dealer_cards)
+        player_sum = self.deck.sum_cards(self.player_cards)
+        print(f"The dealer has {dealer_sum} points and the player has {player_sum} points!")
         if special == 3:
             print("The player chose to surrender! They get half their bet back!")
             player_won = -0.5
-        elif self.deck.sum_cards(self.player_cards) > 21:
+        elif player_sum > 21:
             print("The player went bust! The player lost!")
             player_won = -1
-        elif self.deck.sum_cards(self.dealer_cards) > 21:
+        elif dealer_sum > 21:
             print("The dealer went bust! The player won!")
             player_won = 1
-        elif self.deck.sum_cards(self.player_cards) == self.deck.sum_cards(self.dealer_cards):
+        elif player_sum == dealer_sum:
             print("The player and dealer have the same number of points! A push occurred!")
             player_won = 0
-        elif self.deck.sum_cards(self.player_cards) > self.deck.sum_cards(self.dealer_cards):
+        elif player_sum > dealer_sum:
             print("The player has more points than the dealer! The player won!")
             player_won = 1
-        elif self.deck.sum_cards(self.player_cards) < self.deck.sum_cards(self.dealer_cards):
+        elif player_sum < dealer_sum:
             print("The player has less points than the dealer! The dealer won!")
             player_won = -1
 
@@ -135,19 +132,20 @@ class Blackjack:
 
     # Handles ending the game if someone got a blackjack
     def blackjack_end(self):
-        player_won = 0
+        
+        dealer_sum = self.deck.sum_cards(self.dealer_cards)
+        player_sum = self.deck.sum_cards(self.player_cards)
 
-        if self.deck.sum_cards(self.player_cards) == 21 and self.deck.sum_cards(self.dealer_cards) == 21:
+        #returns the player multiplier by checking who the winner of the game is
+        if player_sum == 21 and dealer_sum == 21:
             print("The player and dealer both have a blackjack! A push occurred!")
-            player_won = 0
-        elif self.deck.sum_cards(self.dealer_cards) == 21:
+            return 0
+        if dealer_sum == 21:
             print("The dealer has a blackjack! Any player who does not have a blackjack has instantly lost!")
-            player_won = -1
-        elif self.deck.sum_cards(self.player_cards) == 21:
+            return -1
+        if player_sum == 21:
             print("The player has a blackjack and the dealer does not! The player gets payed out 3 to 2!")
-            player_won = 2.5
-
-        return player_won
+            return 2.5
 
     # Handles the text validation when a user attempts to make a bet
     def validate_bet(self, text):
