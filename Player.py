@@ -23,17 +23,12 @@ class Player:
         ADDR = (self.SERVER, PORT)
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect(ADDR) 
+        self.sendData(name)
         self.min_bet = 0
         self.player_money = 0
 
     def Handle_requests(self):
-        # game_mode = ["Start new Game", "Join Game"]
-        # game_mode_choice = questionary.select("Would you like to start new Game or join others game?", choices=game_mode).ask()
-        # if game_mode_choice == game_mode[0]:
         
-
-
-
         while True:
             message = self.receiveData()
             # print(message)
@@ -55,8 +50,7 @@ class Player:
                 break
 
     def sendData(self, msg):
-        global HEADER
-        global FORMAT
+        
         message = msg.encode(FORMAT)
         msg_length = len(message)
         send_length = str(msg_length).encode(FORMAT)
@@ -65,8 +59,7 @@ class Player:
         self.client.send(message)
 
     def receiveData(self):
-        global HEADER
-        global FORMAT
+        
         msg_length = self.client.recv(HEADER).decode(FORMAT)
         if msg_length:
             msg_length = int(msg_length)
