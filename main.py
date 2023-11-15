@@ -1,4 +1,6 @@
 import random
+import socket
+
 import questionary
 from blackjack import Blackjack
 from Player import Player
@@ -29,10 +31,15 @@ def main():
         except UserWarning as e:
             logging.error(f"UserWarning: {e}")
             print(f"Exception occurred: {e}")
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as e:
+            logging.exception(f"ConnectionRefusedError: {e}")
             print("The connection was refused by the server. The server may be down, or the port may not be forwarded")
-        except ConnectionAbortedError:
-            print("The connection was aborted. The server may have gone down, or internet may have been lost")
+        except ConnectionResetError as e:
+            logging.exception(f"ConnectionResetError: {e}")
+            print("The connection was reset. The server may have gone down, or you may have lost internet connection")
+        except socket.error as e:
+            logging.exception(f"Socket error: {e}")
+            print(f"An error occurred with the socket connection. Error: {e}")
         except Exception as e:
             logging.exception(f"Exception occurred: {e}")
             print(f"An unexpected error occurred. Error: {e}")

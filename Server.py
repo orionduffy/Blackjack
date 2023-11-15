@@ -5,6 +5,7 @@ import threading
 import pdb
 from Server_blackjack import Blackjack
 from Server_Player_Info import Player
+import logging
 
 # Much of the socket code is copied partly or fully from https://youtu.be/3QiPPX-KeSc?si=wLAnYlhsHv2Fuqry
 
@@ -27,7 +28,7 @@ server.bind(ADDR)
 def handle_clients(players_list):
     blackjack = Blackjack(players_list)
     blackjack.run()
-    connected_players = list(filter(lambda player: player.connected, players_list))
+    connected_players = list(filter(lambda person: person.connected, players_list))
     for player in connected_players:
         send_data(player.conn, DISCONNECT_MESSAGE)
         player.conn.close()
@@ -42,12 +43,37 @@ def start():
 
     while True:
         conn, addr = server.accept()
-        pname = receive_data(conn) + str(len(players_list))
-        newPlayer = Player(pname, conn)
-        msg = OUTPUT_HEADER + "Waiting to Start Game>>>>"
-        send_data(conn, msg)
-        players_list.append(newPlayer)
-        if len(players_list) == no_players:
+        try:
+            pname = receive_data(conn) + str(len(players_list))
+            newPlayer = Player(pname, conn)
+            print(f"Player {newPlayer.name} has joined")
+            msg = OUTPUT_HEADER + "Waiting to Start Game>>>>"
+            send_data(conn, msg)
+            players_list.append(newPlayer)
+        except socket.error as e:
+            print(f"An error occurred with the connection. "
+                  f"Dropping them from the list of connected players")
+            continue
+
+        connected_players = list(filter(lambda person: person.connected, players_list))
+        print(f"There are now {len(connected_players)} players")
+
+        lobbymsg = OUTPUT_HEADER + f"{newPlayer.name} has joined the lobby. " \
+                                   f"There are now {len(connected_players)} players"
+        dropped_players = False
+        for player in connected_players:
+            connect = try_send_data(player, lobbymsg)
+            if not connect:
+                dropped_players = True
+
+        if dropped_players:
+            connected_players = list(filter(lambda person: person.connected, players_list))
+            discmsg = OUTPUT_HEADER + f"One or more players disconnected. " \
+                                      f"There are now only {len(connected_players)} players"
+            for player in connected_players:
+                try_send_data(player, discmsg)
+
+        if len(connected_players) == no_players:
             thread = threading.Thread(target=handle_clients, args=(players_list,))
             print("Game Starting ....")
             thread.start()
@@ -55,15 +81,23 @@ def start():
             print("Game End...Server Shutting down")
             break
 
+def try_send_data(player, msg):
+    try:
+        send_data(player.conn, msg)
+        return True
+    except socket.error as e:
+        print(f"An error occurred with the connection to {player.name}. "
+              f"Dropping them from the list of connected players")
+        player.connected = False
+        return False
 
 def send_data(conn, msg):
     message = msg.encode(FORMAT)
     msg_length = len(message)
     send_length = str(msg_length).encode(FORMAT)
     send_length += b' ' * (HEADER - len(send_length))
-    conn.send(send_length)
-    conn.send(message)
-
+    conn.sendall(send_length)
+    conn.sendall(message)
 
 def receive_data(conn):
     msg_length = conn.recv(HEADER).decode(FORMAT)
@@ -71,7 +105,7 @@ def receive_data(conn):
         msg_length = int(msg_length)
         msg = conn.recv(msg_length).decode(FORMAT)
         return msg
-    return 0
+    raise socket.error("Failed to receive data")
 
 
 def validate_no_players(text):
@@ -81,8 +115,16 @@ def validate_no_players(text):
         return "Invalid input. Please enter a valid number."
 
 
-print("[STARTING] server is starting...")
-start()
+if __name__ == '__main__':
+    try:
+        logging.basicConfig(filename='blackjack_server.log', level=logging.DEBUG)
+        print("[STARTING] server is starting...")
+        start()
+    except UserWarning as e:
+        print(f"Exception occurred: {e}")
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        # TODO: Finish this
 
 # def start():
 #     server.listen()
