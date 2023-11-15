@@ -109,10 +109,25 @@ class Blackjack:
             threads = []
             for player in self.active_players:
                 if player.status == choices[0]:
-                    th = threading.Thread(target=self.thread2, args=(player, break_loop, first_round, choices))
+                    th = threading.Thread(target=self.thread2, args=(player, first_round, choices))
                     threads.append(th)
                     th.start()
             for th in threads: th.join()
+
+            for player in self.players_list:
+                if player.status == choices[0]:
+                    player.player_cards.append(self.shuffled_deck.pop(0))
+                    self.print_player_info(player)
+
+                    if self.deck.sum_cards(player.player_cards) > 21:
+                        self.send_data(player, f"{OUTPUT_HEADER}You went Bust.")
+                        player.status = "Bust"
+
+                    if player.status == choices[0]:
+                        break_loop[0] = False
+                if player.status == choices[2]:
+                    player.player_cards.append(self.shuffled_deck.pop(0))
+                    self.print_player_info(player)
 
             self.broadcast("turn_action")
 
@@ -166,7 +181,7 @@ class Blackjack:
                        f"Beginning game!")
 
     # handles the process of getting the player's turn choice and do the relevant action
-    def thread2(self, player, break_loop, first_round, choices):
+    def thread2(self, player, first_round, choices):
         if first_round:
             content = QUESTION_HEADER_CHOICE + ",".join(choices)
         else:
@@ -174,19 +189,6 @@ class Blackjack:
 
         self.send_data(player, content)
         player.status = self.receive_data(player)
-        if player.status == choices[0]:
-            player.player_cards.append(self.shuffled_deck.pop(0))
-            self.print_player_info(player)
-
-            if self.deck.sum_cards(player.player_cards) > 21:
-                self.send_data(player, f"{OUTPUT_HEADER}Your are Busted.")
-                player.status = "Bust"
-
-            if player.status == choices[0]:
-                break_loop[0] = False
-        if player.status == choices[2]:
-            player.player_cards.append(self.shuffled_deck.pop(0))
-            self.print_player_info(player)
 
     # Handles if the player wants to continue or quit
     def thread3(self, player):
@@ -287,7 +289,9 @@ class Blackjack:
         elif message_type == "turn_action":
             players_action = [player.name + " -> " + player.status for player in
                               self.active_players]
+            players_cards = [player.name + " -> " + str(player.player_cards) for player in self.active_players]
             broadcast_messsage = OUTPUT_HEADER + "Players Turn Action\n" + "\n".join(players_action) + "\n"
+            broadcast_messsage += "Player's Cards\n" + "\n".join(players_cards) + "\n"
 
         elif message_type == "continue_quit":
             players_action = []

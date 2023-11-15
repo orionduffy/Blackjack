@@ -27,7 +27,8 @@ server.bind(ADDR)
 def handle_clients(players_list):
     blackjack = Blackjack(players_list)
     blackjack.run()
-    for player in players_list:
+    connected_players = list(filter(lambda player: player.connected, players_list))
+    for player in connected_players:
         send_data(player.conn, DISCONNECT_MESSAGE)
         player.conn.close()
 
@@ -37,6 +38,7 @@ def start():
     print(f"[LISTENING] Server is listening on {SERVER}")
     players_list = []
     no_players = int(questionary.text("Please Enter number of players?", validate=validate_no_players).ask())
+    print("Waiting for players to join...")
 
     while True:
         conn, addr = server.accept()
