@@ -300,7 +300,7 @@ class Blackjack:
             self.players_list.sort(key=lambda x: x.player_money, reverse=True)
 
             name_and_money = [
-                str(p) + ". " + self.players_list[p].name.ljust(10) + "$" + str(self.players_list[p].player_money) for p
+                str(p + 1 ) + ". " + self.players_list[p].name.ljust(15) + "$" + str(self.players_list[p].player_money) for p
                 in range(len(self.players_list))]
             board_data = "SCORE BOARD".center(30) + "\n" + "\n".join(name_and_money) + "\n"
 

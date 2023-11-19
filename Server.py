@@ -34,8 +34,21 @@ def handle_clients(players_list):
         player.conn.close()
 
 
+def handle_late_connections(server, game_thread):
+    # https://docs.python.org/3/library/socket.html#timeouts-and-the-accept-method
+    server.settimeout(1) 
+
+    while game_thread.is_alive():
+        try:
+            conn, addr = server.accept()  # Accept a new connection
+            send_data(conn, f"{OUTPUT_HEADER}Game has started without you. You can't join the game now. Try again later!!")
+            send_data(conn, DISCONNECT_MESSAGE)
+        except socket.timeout:
+            pass  
+
+
 def start():
-    server.listen(3)
+    server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
     players_list = []
     no_players = int(questionary.text("Please Enter number of players?", validate=validate_no_players).ask())
@@ -43,6 +56,7 @@ def start():
 
     while True:
         conn, addr = server.accept()
+        
         try:
             pname = receive_data(conn) + str(len(players_list))
             newPlayer = Player(pname, conn)
@@ -59,7 +73,7 @@ def start():
         print(f"There are now {len(connected_players)} players")
 
         lobbymsg = OUTPUT_HEADER + f"{newPlayer.name} has joined the lobby. " \
-                                   f"There are now {len(connected_players)} players"
+                                   f"There are now {len(connected_players)} players. Waiting for {no_players - len(connected_players)} more players to join."
         dropped_players = False
         for player in connected_players:
             connect = try_send_data(player, lobbymsg)
@@ -69,15 +83,18 @@ def start():
         if dropped_players:
             connected_players = list(filter(lambda person: person.connected, players_list))
             discmsg = OUTPUT_HEADER + f"One or more players disconnected. " \
-                                      f"There are now only {len(connected_players)} players"
+                                      f"There are now only {len(connected_players)} players. Waiting for {no_players - len(connected_players)} more players to join."
             for player in connected_players:
                 try_send_data(player, discmsg)
 
         if len(connected_players) == no_players:
             thread = threading.Thread(target=handle_clients, args=(players_list,))
+            thread_reject = threading.Thread(target=handle_late_connections, args=(server,thread))
             print("Game Starting ....")
             thread.start()
+            thread_reject.start()
             thread.join()
+            thread_reject.join()
             print("Game End...Server Shutting down")
             break
 
@@ -126,12 +143,3 @@ if __name__ == '__main__':
         print(f"Exception occurred: {e}")
         # TODO: Finish this
 
-# def start():
-#     server.listen()
-#     print(f"[LISTENING] Server is listening on {SERVER}")
-#     list_of_players = []
-#     while True:
-#         conn, addr = server.accept()
-#         thread = threading.Thread(target = handle_client, args=(conn,addr))
-#         thread.start()
-#         print(f"[ACTIVE CONNECTIONS] {threading.activeCount()-1}")

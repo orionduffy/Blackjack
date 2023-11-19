@@ -50,7 +50,10 @@ def validate_IP(ip):
         ip.strip()
 
     ip_split = ip.split('.')
-    if len(ip_split) == 4 and len(ip_split[3]) > 0 \
+    if len(ip_split) == 4 and len(ip_split[0]) > 0 \
+            and len(ip_split[1]) > 0 \
+            and len(ip_split[2]) > 0 \
+            and len(ip_split[3]) > 0 \
             and 0 <= int(ip_split[0]) <= 255 \
             and 0 <= int(ip_split[1]) <= 255 \
             and 0 <= int(ip_split[2]) <= 255 \
