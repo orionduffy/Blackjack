@@ -1,184 +1,71 @@
 import random
-import questionary
+import socket
 
-# Nahom-dev
-card_types = ['\u2663', '\u2660', '\u2665', '\u2666']
-card_num = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
-value = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
-# this deck of cards is initiated at the start of the session and is not used in play. A deck of keys is used instead.
-base_deck = {card_num[j] + n: value[j] for n in card_types for j in range(len(card_num))}
+import questionary
+from blackjack import Blackjack
+from Player import Player
+import re
+import logging
 
 
 # Runs a game of Blackjack
 def main():
     print("Welcome to Blackjack!")
 
-    player_money = 100
-    # Choices listed here because hardcoding is bad
-    choices = ["Continue", "Quit"]
-    choice = choices[0]
-    min_bet = 5
+    # player = Player("player_name", "192.168.56.1")
+    # player.handle_requests()
 
-    def validate_bet(text):
-        try:
-            bet = int(text)
-            if bet > player_money:
-                return "You don't have that much money! Please enter a lower amount"
-            elif bet < min_bet:
-                return "The minimum bet is $5"
-            else:
-                return True
-        except ValueError:
-            return "Please enter a number"
+    game_type = ["Singleplayer", "Multiplayer"]
+    player_game_choice = questionary.select("What type of game do want to play?", choices=game_type).ask()
 
-    while player_money >= min_bet and choice == choices[0]:
-        print(f"You have ${player_money} to bet with!")
-        bet = int(questionary.text("How much would you like to bet?", validate=validate_bet).ask())
-
-        print(f"${bet} will be bet! You have ${player_money - bet} left in reserve! Beginning game!")
-
-        multiplier = play_blackjack()
-
-        player_money += bet * multiplier
-        player_money = int(player_money)
-        print(f"You now have ${player_money}!")
-        if player_money >= min_bet:
-            choice = questionary.select("What do you want to do?", choices=choices).ask()
-
-    print(f"Thank you for playing. You left with ${player_money}")
-
-
-# Runs the core game loop
-def play_blackjack():
-    deck = shuffle_deck(base_deck)
-
-    player_cards = []
-    dealer_cards = []
-
-    for i in range(2):
-        player_cards.append(deck.pop(0))
-
-    for i in range(2):
-        dealer_cards.append(deck.pop(0))
-
-    print(f"Dealer's up card: {dealer_cards[0]} ({base_deck[dealer_cards[0]]} points)")
-    print(f"Your cards: {player_cards}")
-    print(f"Sum: {sum_cards(player_cards)}")
-
-    if sum_cards(dealer_cards) != 21 and sum_cards(player_cards) != 21:
-        # Choices listed here because hardcoding is bad
-        choices = ["Hit (Draw another card)",
-                   "Stand (Keep your current hand)",
-                   "Double (Double your original bet and get only 1 more card)",
-                   "Surrender (Give up and get half your bet back)"
-                   ]
-        choice = questionary.select("What do you want to do?", choices=choices).ask()
-
-        while choice == choices[0]:
-
-            player_cards.append(deck.pop(0))
-
-            print(f"Your cards: {player_cards}")
-            print(f"Sum: {sum_cards(player_cards)}")
-
-            if sum_cards(player_cards) > 21:
-                break
-
-            choice = questionary.select("What do you want to do next?", choices=choices[:-2]).ask()
-
-        if choice == choices[2]:
-            player_cards.append(deck.pop(0))
-
-            print(f"Your cards: {player_cards}")
-            print(f"Sum: {sum_cards(player_cards)}")
-
-        if sum_cards(player_cards) <= 21 and choice != choices[-1]:
-            print("The dealer now flips over their hole card.")
-            print(f"Dealer cards: {dealer_cards}")
-            print(f"Dealer sum: {sum_cards(dealer_cards)}")
-
-            if sum_cards(dealer_cards) < 17:
-                print("The dealer has less than 17 points. he begins drawing.")
-
-            while sum_cards(dealer_cards) < 17:
-                dealer_cards.append(deck.pop(0))
-                print(f"Dealer cards: {dealer_cards}")
-                print(f"Dealer sum: {sum_cards(dealer_cards)}")
-
-        print("Game over!")
-        return game_end(player_cards, dealer_cards, choices.index(choice))
+    if player_game_choice == game_type[0]:
+        blackjack = Blackjack()
+        blackjack.run()
     else:
-        print("Game immediately over!")
-        return blackjack_end(player_cards, dealer_cards)
+        try:
+            player_name = questionary.text("Enter Player name: ").ask()
+            server_ip = questionary.text("Please enter the Server IP you want to connect to?",
+                                         validate=validate_IP).ask().strip()
+            player = Player(player_name, server_ip)
+            player.handle_requests()
+        except UserWarning as e:
+            logging.error(f"UserWarning: {e}")
+            print(f"Exception occurred: {e}")
+        except ConnectionRefusedError as e:
+            logging.exception(f"ConnectionRefusedError: {e}")
+            print("The connection was refused by the server. The server may be down, or the port may not be forwarded")
+        except ConnectionResetError as e:
+            logging.exception(f"ConnectionResetError: {e}")
+            print("The connection was reset. The server may have gone down, or you may have lost internet connection")
+        except socket.error as e:
+            logging.exception(f"Socket error: {e}")
+            print(f"An error occurred with the socket connection. Error: {e}")
+        except Exception as e:
+            logging.exception(f"Exception occurred: {e}")
+            print(f"An unexpected error occurred. Error: {e}")
 
 
-def game_end(player_cards, dealer_cards, special=0):
-    player_won = 0
-    print(f"The dealer has {sum_cards(dealer_cards)} points and the player has {sum_cards(player_cards)} points!")
-    if special == 3:
-        print("The player chose to surrender! They get half their bet back!")
-        player_won = -0.5
-    elif sum_cards(player_cards) > 21:
-        print("The player went bust! The player lost!")
-        player_won = -1
-    elif sum_cards(dealer_cards) > 21:
-        print("The dealer went bust! The player won!")
-        player_won = 1
-    elif sum_cards(player_cards) == sum_cards(dealer_cards):
-        print("The player and dealer have the same number of points! A push occurred!")
-        player_won = 0
-    elif sum_cards(player_cards) > sum_cards(dealer_cards):
-        print("The player has more points than the dealer! The player won!")
-        player_won = 1
-    elif sum_cards(player_cards) < sum_cards(dealer_cards):
-        print("The player has less points than the dealer! The dealer won!")
-        player_won = -1
+def validate_IP(ip):
+    if len(ip) > 0:
+        ip.strip()
 
-    if special == 2:
-        player_won *= 2
-
-    return player_won
-
-
-def blackjack_end(player_cards, dealer_cards):
-    player_won = 0
-
-    if sum_cards(player_cards) == 21 and sum_cards(dealer_cards) == 21:
-        print("The player and dealer both have a blackjack! A push occurred!")
-        player_won = 0
-    elif sum_cards(dealer_cards) == 21:
-        print("The dealer has a blackjack! Any player who does not have a blackjack has instantly lost!")
-        player_won = -1
-    elif sum_cards(player_cards) == 21:
-        print("The player has a blackjack and the dealer does not! The player gets payed out 3 to 2!")
-        player_won = 2.5
-
-    return player_won
-
-
-# https://pynative.com/python-random-shuffle/#:~:text=Shuffling%20a%20dictionary%20is%20not,dictionary%20values%20using%20shuffled%20keys.
-#  This function is used to shuffle the deck of cards dictionary and is called after every new game
-def shuffle_deck(deck):
-    keys = list(deck.keys())
-    random.shuffle(keys)
-    return keys
-
-
-# This method accept the deck keys only and it figures their values by itself and calculates the sum
-def sum_cards(cards):
-    values = [base_deck[card] for card in cards]
-    point_sum = sum(values)
-    aces = values.count(11)
-
-    for i in range(aces):
-        if point_sum > 21:
-            point_sum -= 10
-
-    return point_sum
+    ip_split = ip.split('.')
+    if len(ip_split) == 4 and len(ip_split[0]) > 0 \
+            and len(ip_split[1]) > 0 \
+            and len(ip_split[2]) > 0 \
+            and len(ip_split[3]) > 0 \
+            and 0 <= int(ip_split[0]) <= 255 \
+            and 0 <= int(ip_split[1]) <= 255 \
+            and 0 <= int(ip_split[2]) <= 255 \
+            and 0 <= int(ip_split[3]) <= 255:
+        return True
+    else:
+        return "Please Enter Valid IP Server Address"
 
 
 if __name__ == '__main__':
     try:
+        logging.basicConfig(filename='blackjack.log', level=logging.DEBUG)
         main()
     except UserWarning as e:
         print(f"Exception occurred: {e}")
