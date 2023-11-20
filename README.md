@@ -25,9 +25,8 @@ Allows a person to play Blackjack alone or host a server to play with friends. S
 ```
 python main.py
 ```
-
-
-
+\
+\
 * For multiplayer, someone must host the server
 * If cheating is a concern, someone who is not playing could be chosen to host the server
 ```
@@ -46,7 +45,6 @@ This may happen in some IDEs if they do a simplified imitation of a terminal, si
 ## Authors
 
 Orion Duffy
-
 
 Nahom Demoz
 
