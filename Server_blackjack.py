@@ -79,6 +79,12 @@ class Blackjack:
             th.start()
         for th in threads: th.join()
 
+        for player in self.players_list:
+            if player.mid_join:
+                player.rejoin_game()
+
+        self.refresh_player_lists()
+
         self.broadcast("continue_quit")
 
         if len(self.active_players) == 0:
@@ -114,6 +120,7 @@ class Blackjack:
         # first_round is used to sendall the player either all 4 choices or first two choices
         first_round = True
         while True:
+            self.refresh_player_lists()
             # the flag indicate if the current game come to end and if True the while loop will terminate
             break_loop = [True]
             threads = []
@@ -123,6 +130,7 @@ class Blackjack:
                     threads.append(th)
                     th.start()
             for th in threads: th.join()
+            self.refresh_player_lists()
 
             for player in self.active_players:
                 if player.status == choices[0]:
