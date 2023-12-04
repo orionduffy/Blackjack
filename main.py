@@ -7,13 +7,14 @@ from Player import Player
 import re
 import logging
 
+# https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+from colorama import init as colorama_init
+from colorama import Fore,Style
+
 
 # Runs a game of Blackjack
 def main():
-    print("Welcome to Blackjack!")
-
-    # player = Player("player_name", "192.168.56.1")
-    # player.handle_requests()
+    print(f"{Fore.GREEN}Welcome to Blackjack!{Style.RESET_ALL}")
 
     game_type = ["Singleplayer", "Multiplayer"]
     player_game_choice = questionary.select("What type of game do want to play?", choices=game_type).ask()
@@ -29,20 +30,20 @@ def main():
             player = Player(player_name, server_ip)
             player.handle_requests()
         except UserWarning as e:
-            logging.error(f"UserWarning: {e}")
-            print(f"Exception occurred: {e}")
+            logging.error(f"{Fore.RED}UserWarning: {e}{Style.RESET_ALL}")
+            print(f"{Fore.RED}Exception occurred: {e}{Style.RESET_ALL}")
         except ConnectionRefusedError as e:
-            logging.exception(f"ConnectionRefusedError: {e}")
-            print("The connection was refused by the server. The server may be down, or the port may not be forwarded")
+            logging.exception(f"{Fore.RED}ConnectionRefusedError: {e}{Style.RESET_ALL}")
+            print("The connection was refused by the server. The server may be down, or the port may not be forwarded{Style.RESET_ALL}")
         except ConnectionResetError as e:
-            logging.exception(f"ConnectionResetError: {e}")
-            print("The connection was reset. The server may have gone down, or you may have lost internet connection")
+            logging.exception(f"{Fore.RED}ConnectionResetError: {e}{Style.RESET_ALL}")
+            print("The connection was reset. The server may have gone down, or you may have lost internet connection{Style.RESET_ALL}")
         except socket.error as e:
-            logging.exception(f"Socket error: {e}")
-            print(f"An error occurred with the socket connection. Error: {e}")
+            logging.exception(f"{Fore.RED}Socket error: {e}{Style.RESET_ALL}")
+            print(f"{Fore.RED}An error occurred with the socket connection. Error: {e}{Style.RESET_ALL}")
         except Exception as e:
-            logging.exception(f"Exception occurred: {e}")
-            print(f"An unexpected error occurred. Error: {e}")
+            logging.exception(f"{Fore.RED}Exception occurred: {e}{Style.RESET_ALL}")
+            print(f"{Fore.RED}An unexpected error occurred. Error: {e}{Style.RESET_ALL}")
 
 
 def validate_IP(ip):
