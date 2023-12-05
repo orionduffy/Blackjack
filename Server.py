@@ -8,6 +8,10 @@ from Server_Player_Info import Player
 import logging
 import multiprocessing
 
+# https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+from colorama import init as colorama_init
+from colorama import Fore,Style
+
 # Much of the socket code is copied partly or fully from https://youtu.be/3QiPPX-KeSc?si=wLAnYlhsHv2Fuqry
 
 
@@ -91,14 +95,14 @@ def start():
     server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
     players_list = []
-    no_players = int(questionary.text("Please Enter number of players:", validate=validate_no_players).ask())
+    no_players = int(questionary.text("Please enter number of players:", validate=validate_no_players).ask())
 
     allow_rejoin = questionary \
         .confirm("Would you like to allow players to rejoin in between games if they disconnected?").ask()
     allow_new_joins = questionary \
         .confirm("Would you like to allow new players to join in between games?").ask()
 
-    print("Waiting for players to join...")
+    print(f"{Fore.GREEN}Waiting for players to join...{Style.RESET_ALL}")
 
     should_start = [False]
 
@@ -111,22 +115,25 @@ def start():
 
         try:
             pname = receive_data(conn) + str(len(players_list))
-            new_player = Player(pname, conn, addr)
-            print(f"Player {new_player.name} has joined")
-            msg = OUTPUT_HEADER + "Waiting to Start Game>>>>"
+            
+            newPlayer = Player(pname, conn, addr)
+            print(f"Player {newPlayer.name} has joined")
+            msg = OUTPUT_HEADER + F"{Fore.GREEN}{pname} please wait for the Game to start>>>>{Style.RESET_ALL}"
+            
             send_data(conn, msg)
             players_list.append(new_player)
         except socket.error as e:
-            print(f"An error occurred with the connection. "
-                  f"Dropping them from the list of connected players")
+            print(f"{Fore.RED}An error occurred with the connection. "
+                  f"Dropping them from the list of connected players{Style.RESET_ALL}")
             continue
 
         connected_players = list(filter(lambda person: person.connected, players_list))
-        print(f"There are now {len(connected_players)} players")
+        print(f"{Fore.BLUE}There are now {len(connected_players)} players{Style.RESET_ALL}")
 
-        lobbymsg = OUTPUT_HEADER + f"{new_player.name} has joined the lobby. " \
+        lobbymsg = OUTPUT_HEADER + f"{Fore.BLUE}{new_player.name} has joined the lobby. " \
                                    f"There are now {len(connected_players)} players. " \
-                                   f"Waiting for {no_players - len(connected_players)} more players to join."
+                                   f"Waiting for {no_players - len(connected_players)} more players to join.{Style.RESET_ALL}"
+
         dropped_players = False
         for player in connected_players:
             connect = try_send_data(player, lobbymsg)
@@ -135,9 +142,11 @@ def start():
 
         if dropped_players:
             connected_players = list(filter(lambda person: person.connected, players_list))
-            discmsg = OUTPUT_HEADER + f"One or more players disconnected. " \
-                                      f"There are now only {len(connected_players)} players. " \
-                                      f"Waiting for {no_players - len(connected_players)} more players to join."
+
+            discmsg = OUTPUT_HEADER + f"{Fore.RED}One or more players disconnected. {Style.RESET_ALL}" \
+                                      f"{Fore.BLUE}There are now only {len(connected_players)} players. " \
+                                      f"Waiting for {no_players - len(connected_players)} more players to join.{Style.RESET_ALL}"
+  
             for player in connected_players:
                 try_send_data(player, discmsg)
 
@@ -164,12 +173,12 @@ def start_game(players_list, allow_rejoin, allow_new_joins):
                                                                            players_list,
                                                                            allow_rejoin,
                                                                            allow_new_joins))
-    print("Game Starting ....")
+    print(f"{Fore.GREEN}Game Starting ....{Style.RESET_ALL}")
     thread.start()
     thread_reject.start()
     thread.join()
     thread_reject.join()
-    print("Game End...Server Shutting down")
+    print(f"{Fore.GREEN}Game End...Server Shutting down{Style.RESET_ALL}")
 
 
 def try_send_data(player, msg):
@@ -177,8 +186,8 @@ def try_send_data(player, msg):
         send_data(player.conn, msg)
         return True
     except socket.error as e:
-        print(f"An error occurred with the connection to {player.name}. "
-              f"Dropping them from the list of connected players")
+        print(f"{Fore.RED}An error occurred with the connection to {player.name}. "
+              f"Dropping them from the list of connected players{Style.RESET_ALL}")
         player.connected = False
         return False
 
@@ -211,7 +220,7 @@ def validate_no_players(text):
 if __name__ == '__main__':
     try:
         logging.basicConfig(filename='blackjack_server.log', level=logging.DEBUG)
-        print("[STARTING] server is starting...")
+        print(f"{Fore.GREEN}[STARTING] server is starting...{Style.RESET_ALL}")
         start()
     except UserWarning as e:
         print(f"Exception occurred: {e}")
