@@ -207,7 +207,7 @@ def receive_data(conn):
         msg_length = int(msg_length)
         msg = conn.recv(msg_length).decode(FORMAT)
         return msg
-    raise socket.error("Failed to receive data")
+    raise socket.error(f"{Fore.RED}Failed to receive data{Style.RESET_ALL}")
 
 
 def validate_no_players(text):

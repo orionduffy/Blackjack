@@ -225,8 +225,8 @@ class Blackjack:
                                     f"You have ${player.player_money - self.bets[player.name]} left in reserve! \n" 
                                     f"Game Beginning!\n{Style.RESET_ALL}")
             except ValueError:
-                msg = f"Player {player.name}'s machine attempted to send an invalid input to the server.\n" \
-                       f"There may be a bug, or the player may have modified the program."
+                msg = f"{Fore.RED}Player {player.name}'s machine attempted to send an invalid input to the server.\n" \
+                       f"There may be a bug, or the player may have modified the program.{Style.RESET_ALL}"
                 logging.error(msg)
                 print(msg)
 
@@ -260,8 +260,8 @@ class Blackjack:
         if player.player_money < self.min_bet or choice == choices[1] or choice == choices[2]:
             if response:
                 response = self.try_send_data(player,
-                               f"{OUTPUT_HEADER}Thank you for playing. "
-                               f"You left with ${player.player_money}")
+                               f"{OUTPUT_HEADER}{Fore.BLUE}Thank you for playing. "
+                               f"You left with {Fore.GREEN}${player.player_money}{Style.RESET_ALL}")
             player.active = False
         if choice == choices[2]:
             player.connected = False
@@ -400,10 +400,15 @@ class Blackjack:
             return True
         except socket.error as e:
             logging.error(f"Error sending data to {player.name}: {e}")
-            print(f"An error occurred with the connection to {player.name} when attempting to send data. "
-                  f"Dropping them from the list of connected players")
+            print(f"{Fore.RED}An error occurred with the connection to {player.name} when attempting to send data. "
+                  f"Dropping them from the list of connected players{Style.RESET_ALL}")
             player.connected = False
             self.refresh_player_lists()
+
+            discmsg = OUTPUT_HEADER + f"{Fore.RED}{player.name} seems to have disconnected. " \
+                                      f"There are now only {len(self.connected_players)} players{Style.RESET_ALL}"
+            for rplayer in self.connected_players:
+                self.try_send_data(rplayer, discmsg)
             return False
 
     def send_data(self, player, msg):
@@ -419,13 +424,13 @@ class Blackjack:
             return self.receive_data(player)
         except socket.error as e:
             logging.error(f"Error receiving data from {player.name}: {e}")
-            print(f"An error occurred with the connection to {player.name} when attempting to receive data. "
-                  f"Dropping them from the list of connected players")
+            print(f"{Fore.RED}An error occurred with the connection to {player.name} when attempting to receive data. "
+                  f"Dropping them from the list of connected players{Style.RESET_ALL}")
             player.connected = False
             self.refresh_player_lists()
 
-            discmsg = OUTPUT_HEADER + f"{player.name} seems to have disconnected. " \
-                                      f"There are now only {len(self.connected_players)} players"
+            discmsg = OUTPUT_HEADER + f"{Fore.RED}{player.name} seems to have disconnected. " \
+                                      f"There are now only {len(self.connected_players)} players{Style.RESET_ALL}"
             for rplayer in self.connected_players:
                 self.try_send_data(rplayer, discmsg)
 
