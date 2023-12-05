@@ -116,8 +116,8 @@ def start():
         try:
             pname = receive_data(conn) + str(len(players_list))
             
-            newPlayer = Player(pname, conn, addr)
-            print(f"Player {newPlayer.name} has joined")
+            new_player = Player(pname, conn, addr)
+            print(f"Player {new_player.name} has joined")
             msg = OUTPUT_HEADER + F"{Fore.GREEN}{pname} please wait for the Game to start>>>>{Style.RESET_ALL}"
             
             send_data(conn, msg)
