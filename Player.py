@@ -2,6 +2,9 @@ import socket
 import questionary
 import logging
 
+from colorama import init as colorama_init
+from colorama import Fore,Style
+
 
 QUESTION_HEADER_CHOICE = "CHOOCE\n"
 st = len(QUESTION_HEADER_CHOICE)
@@ -33,8 +36,8 @@ class Player:
             message = self.receive_data()
             # print(message)
             if type(message) == int:
-                print(f"An error has occurred on the server's end. Error code sent to player: {message}")
-                print("Player Connection Closing...")
+                print(f"{Fore.RED}An error has occurred on the server's end. Error code sent to player: {message}")
+                print(f"Player Connection Closing...{Style.RESET_ALL}")
                 self.client.close()
                 break
             elif message.startswith(OUTPUT_HEADER):
@@ -50,7 +53,7 @@ class Player:
                 choice = questionary.select("What do you want to do?", choices=choices).ask()
                 self.send_data(choice)
             elif message == DISCONNECT_MESSAGE:
-                print("Player Connection Closing...")
+                print(f"{Fore.GREEN}Player Connection Closing...{Style.RESET_ALL}")
                 self.client.close()
                 break
 

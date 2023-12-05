@@ -1,6 +1,9 @@
 import questionary
 from deck import Deck
 
+from colorama import init as colorama_init
+from colorama import Fore,Style
+
 
 # The main class for running the Blackjack game. Game will continue until the player either quits or runs out of money
 class Blackjack:
@@ -20,22 +23,22 @@ class Blackjack:
         choice = choices[0]
 
         while self.player_money >= self.min_bet and choice == choices[0]:
-            print(f"You have ${self.player_money} to bet with!")
+            print(f"{Fore.BLUE}You have ${self.player_money} to bet with!{Style.RESET_ALL}")
             bet = int(questionary.text("How much would you like to bet?", validate=self.validate_bet).ask())
 
-            print(f"${bet} will be bet! You have ${self.player_money - bet} left in reserve! Beginning game!")
+            print(f"{Fore.BLUE}${bet} will be bet! You have ${self.player_money - bet} left in reserve! Beginning game!{Style.RESET_ALL}")
 
             multiplier = self.run_round()
             self.reset_game()
 
             self.player_money += bet * multiplier
             self.player_money = int(self.player_money)
-            print(f"You now have ${self.player_money}!")
+            print(f"{Fore.BLUE}You now have ${self.player_money}!{Style.RESET_ALL}")
 
             if self.player_money >= self.min_bet:
                 choice = questionary.select("What do you want to do?", choices=choices).ask()
 
-        print(f"Thank you for playing. You left with ${self.player_money}")
+        print(f"{Fore.GREEN}Thank you for playing. You left with ${self.player_money}{Style.RESET_ALL}")
 
     def reset_game(self):
         self.shuffled_deck = self.deck.shuffle_deck()
@@ -53,9 +56,9 @@ class Blackjack:
         for i in range(2):
             self.dealer_cards.append(self.shuffled_deck.pop(0))
 
-        print(f"Dealer's up card: {self.dealer_cards[0]} ({self.deck.base_deck[self.dealer_cards[0]]} points)")
-        print(f"Your cards: {self.player_cards}")
-        print(f"Sum: {self.deck.sum_cards(self.player_cards)}")
+        print(f"{Fore.YELLOW}Dealer's up card{Style.RESET_ALL}: {self.dealer_cards[0]} ({self.deck.base_deck[self.dealer_cards[0]]} points)")
+        print(f"{Fore.YELLOW}Your cards{Style.RESET_ALL}: {self.player_cards}")
+        print(f"{Fore.YELLOW}Sum{Style.RESET_ALL}: {self.deck.sum_cards(self.player_cards)}")
 
         if self.deck.sum_cards(self.dealer_cards) != 21 and self.deck.sum_cards(self.player_cards) != 21:
             # Choices listed here because hardcoding is bad
@@ -70,8 +73,8 @@ class Blackjack:
 
                 self.player_cards.append(self.shuffled_deck.pop(0))
 
-                print(f"Your cards: {self.player_cards}")
-                print(f"Sum: {self.deck.sum_cards(self.player_cards)}")
+                print(f"{Fore.YELLOW}Your cards{Style.RESET_ALL}: {self.player_cards}")
+                print(f"{Fore.YELLOW}Sum{Style.RESET_ALL}: {self.deck.sum_cards(self.player_cards)}")
 
                 if self.deck.sum_cards(self.player_cards) > 21:
                     break
@@ -81,27 +84,27 @@ class Blackjack:
             if choice == choices[2]:
                 self.player_cards.append(self.shuffled_deck.pop(0))
 
-                print(f"Your cards: {self.player_cards}")
-                print(f"Sum: {self.deck.sum_cards(self.player_cards)}")
+                print(f"{Fore.YELLOW}Your cards{Style.RESET_ALL}: {self.player_cards}")
+                print(f"{Fore.YELLOW}Sum{Style.RESET_ALL}: {self.deck.sum_cards(self.player_cards)}")
 
             if self.deck.sum_cards(self.player_cards) <= 21 and choice != choices[-1]:
-                print("The dealer now flips over their hole card.")
-                print(f"Dealer cards: {self.dealer_cards}")
-                print(f"Dealer sum: {self.deck.sum_cards(self.dealer_cards)}")
+                print(f"{Fore.BLUE}The dealer now flips over their hole card.{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}Dealer cards{Style.RESET_ALL}: {self.dealer_cards}")
+                print(f"{Fore.YELLOW}Dealer sum{Style.RESET_ALL}: {self.deck.sum_cards(self.dealer_cards)}")
 
                 if self.deck.sum_cards(self.dealer_cards) < 17:
                     print("The dealer has less than 17 points. he begins drawing.")
 
                 while self.deck.sum_cards(self.dealer_cards) < 17:
                     self.dealer_cards.append(self.shuffled_deck.pop(0))
-                    print(f"Dealer cards: {self.dealer_cards}")
-                    print(f"Dealer sum: {self.deck.sum_cards(self.dealer_cards)}")
+                    print(f"{Fore.YELLOW}Dealer cards{Style.RESET_ALL}: {self.dealer_cards}")
+                    print(f"{Fore.YELLOW}Dealer sum{Style.RESET_ALL}: {self.deck.sum_cards(self.dealer_cards)}")
 
-            print("Game over!")
+            print(f"{Fore.GREEN}Game over!{Style.RESET_ALL}")
             return self.game_end(choices.index(choice))
         else:
             # If one person has a blackjack, the game immediately ends
-            print("Game immediately over!")
+            print(f"{Fore.GREEN}Game immediately over!{Style.RESET_ALL}")
             return self.blackjack_end()
 
     # Handles a normal ending of the game
@@ -110,22 +113,22 @@ class Blackjack:
         print(
             f"The dealer has {self.deck.sum_cards(self.dealer_cards)} points and the player has {self.deck.sum_cards(self.player_cards)} points!")
         if special == 3:
-            print("The player chose to surrender! They get half their bet back!")
+            print(f"{Fore.YELLOW}The player chose to surrender! They get half their bet back!{Style.RESET_ALL}")
             player_won = -0.5
         elif self.deck.sum_cards(self.player_cards) > 21:
-            print("The player went bust! The player lost!")
+            print(f"{Fore.RED}The player went bust! The player lost!{Style.RESET_ALL}")
             player_won = -1
         elif self.deck.sum_cards(self.dealer_cards) > 21:
-            print("The dealer went bust! The player won!")
+            print(f"{Fore.BLUE}The dealer went bust! The player won!{Style.RESET_ALL}")
             player_won = 1
         elif self.deck.sum_cards(self.player_cards) == self.deck.sum_cards(self.dealer_cards):
-            print("The player and dealer have the same number of points! A push occurred!")
+            print(f"{Fore.YELLOW}The player and dealer have the same number of points! A push occurred!{Style.RESET_ALL}")
             player_won = 0
         elif self.deck.sum_cards(self.player_cards) > self.deck.sum_cards(self.dealer_cards):
-            print("The player has more points than the dealer! The player won!")
+            print(f"{Fore.BLUE}The player has more points than the dealer! The player won!{Style.RESET_ALL}")
             player_won = 1
         elif self.deck.sum_cards(self.player_cards) < self.deck.sum_cards(self.dealer_cards):
-            print("The player has less points than the dealer! The dealer won!")
+            print(f"{Fore.RED}The player has less points than the dealer! The dealer won!{Style.RESET_ALL}")
             player_won = -1
 
         if special == 2:
@@ -138,13 +141,13 @@ class Blackjack:
         player_won = 0
 
         if self.deck.sum_cards(self.player_cards) == 21 and self.deck.sum_cards(self.dealer_cards) == 21:
-            print("The player and dealer both have a blackjack! A push occurred!")
+            print(f"{Fore.YELLOW}The player and dealer both have a blackjack! A push occurred!{Style.RESET_ALL}")
             player_won = 0
         elif self.deck.sum_cards(self.dealer_cards) == 21:
-            print("The dealer has a blackjack! Any player who does not have a blackjack has instantly lost!")
+            print(f"{Fore.RED}The dealer has a blackjack! Any player who does not have a blackjack has instantly lost!")
             player_won = -1
         elif self.deck.sum_cards(self.player_cards) == 21:
-            print("The player has a blackjack and the dealer does not! The player gets payed out 3 to 2!")
+            print(f"{Fore.BLUE}The player has a blackjack and the dealer does not! The player gets payed out 3 to 2!{Style.RESET_ALL}")
             player_won = 2.5
 
         return player_won

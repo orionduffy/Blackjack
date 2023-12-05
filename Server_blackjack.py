@@ -7,6 +7,11 @@ import copy
 from Server_Player_Info import Player
 import logging
 
+# https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
+from colorama import init as colorama_init
+from colorama import Fore,Style
+
+
 HEADER = 64
 PORT = 5050
 # SERVER = "172.19.93.54"
@@ -18,6 +23,7 @@ QUESTION_HEADER_CHOICE = "CHOOCE\n"
 QUESTION_HEADER_INPUT = "IINPUT\n"
 OUTPUT_HEADER = "OUTPUT\n"
 lock = threading.Lock()
+colorama_init()
 
 
 # The main class for running the Blackjack game. Game will continue until the player either quits or runs out of money
@@ -70,7 +76,10 @@ class Blackjack:
         for player in self.active_players:
             player.player_money += self.bets[player.name] * multipliers[player.name]
             player.player_money = int(player.player_money)
-            self.try_send_data(player, f"{OUTPUT_HEADER}You now have ${player.player_money}!")
+            self.try_send_data(player, f"{OUTPUT_HEADER}{Fore.BLUE}You now have ${player.player_money}!{Style.RESET_ALL}")
+
+        # Broadcasting the Score board after every game
+        self.broadcast('score_board')
 
         # going for the next round and asking the player if they want to play or not
         for player in self.active_players:
@@ -87,9 +96,7 @@ class Blackjack:
 
         self.broadcast("continue_quit")
 
-        if len(self.active_players) == 0:
-            self.broadcast('score_board')
-        elif len(self.active_players) > 0:
+        if len(self.active_players) > 0:
             self.run()
 
     # Runs the loop for an individual rounds,
@@ -103,7 +110,7 @@ class Blackjack:
 
         for player in self.active_players:
             response = self.try_send_data(player,
-                               f"{OUTPUT_HEADER}Dealer's up card: {self.dealer_cards[0]} "
+                               f"{OUTPUT_HEADER}{Fore.YELLOW}Dealer's up card{Style.RESET_ALL}: {self.dealer_cards[0]} "
                                f"({self.deck.base_deck[self.dealer_cards[0]]} points)")
             if response:
                 self.print_player_info(player)
@@ -137,7 +144,7 @@ class Blackjack:
                     player.player_cards.append(self.shuffled_deck.pop(0))
 
                     if self.deck.sum_cards(player.player_cards) > 21:
-                        self.try_send_data(player, f"{OUTPUT_HEADER}You went Bust.")
+                        self.try_send_data(player, f"{OUTPUT_HEADER}{Fore.RED}You went Bust.\n{Style.RESET_ALL}")
                         player.status = "Bust"
 
                     if player.status == choices[0]:
@@ -168,7 +175,7 @@ class Blackjack:
                 if response:
                     self.print_dealer_info(player)
 
-        for player in self.active_players: self.try_send_data(player, f"{OUTPUT_HEADER}Game over!")
+        for player in self.active_players: self.try_send_data(player, f"{OUTPUT_HEADER}{Fore.GREEN}Game over!{Style.RESET_ALL}")
         return self.game_end(choices)
         # else:
         #     # If one person has a blackjack, the game immediately ends
@@ -183,19 +190,19 @@ class Blackjack:
 
     def print_player_info(self, player):
         response = self.try_send_data(player,
-                                      f"{OUTPUT_HEADER}Your cards: {player.player_cards} \n"
-                                      f"Player Sum: {self.deck.sum_cards(player.player_cards)}")
+                                      f"{OUTPUT_HEADER}{Fore.YELLOW}Your cards{Style.RESET_ALL}: {player.player_cards} \n"
+                                      f"{Fore.YELLOW}Player Sum{Style.RESET_ALL}: {self.deck.sum_cards(player.player_cards)}")
         return response
 
     def print_dealer_info(self, ind):
         response = self.try_send_data(ind,
-                                      f"{OUTPUT_HEADER}Dealer cards: {self.dealer_cards} \n"
-                                      f"Dealer sum: {self.deck.sum_cards(self.dealer_cards)}")
+                                      f"{OUTPUT_HEADER}{Fore.YELLOW}Dealer cards{Style.RESET_ALL}: {self.dealer_cards} \n"
+                                      f"{Fore.YELLOW}Dealer sum{Style.RESET_ALL}: {self.deck.sum_cards(self.dealer_cards)}")
         return response
 
     # handles the process of getting bet amount from the players
     def thread1(self, player):
-        response = self.try_send_data(player, f"{OUTPUT_HEADER}You have ${player.player_money} to bet with!")
+        response = self.try_send_data(player, f"{OUTPUT_HEADER}{Fore.BLUE}You have ${player.player_money} to bet with!{Style.RESET_ALL}")
         if not response:
             self.bets.pop(player.name)
             return False
@@ -214,12 +221,12 @@ class Blackjack:
                 self.bets[player.name] = int(bet_attempt)
 
                 self.try_send_data(player,
-                                   f"{OUTPUT_HEADER}${self.bets[player.name]} will be bet! "
-                                   f"You have ${player.player_money - self.bets[player.name]} left in reserve! "
-                                   f"Beginning game!")
+                                   f"{OUTPUT_HEADER}{Fore.YELLOW}${self.bets[player.name]} will be bet! " 
+                                    f"You have ${player.player_money - self.bets[player.name]} left in reserve! \n" 
+                                    f"Game Beginning!\n{Style.RESET_ALL}")
             except ValueError:
                 msg = f"Player {player.name}'s machine attempted to send an invalid input to the server.\n" \
-                      f"There may be a bug, or the player may have modified the program."
+                       f"There may be a bug, or the player may have modified the program."
                 logging.error(msg)
                 print(msg)
 
@@ -290,25 +297,25 @@ class Blackjack:
                 multipliers[player.name] = 2.5
             elif special == 3:
                 self.try_send_data(player,
-                                   f"{OUTPUT_HEADER}The player chose to surrender! They get half their bet back!")
+                                   f"{OUTPUT_HEADER}{Fore.YELLOW}The player chose to surrender! They get half their bet back!{Style.RESET_ALL}")
                 multipliers[player.name] = -0.5
             elif players_sum[player.name] > 21:
-                self.try_send_data(player, f"{OUTPUT_HEADER}The player went bust! The player lost!")
+                self.try_send_data(player, f"{OUTPUT_HEADER}{Fore.RED}The player went bust! The player lost!{Style.RESET_ALL}")
                 multipliers[player.name] = -1
             elif dealer_sum > 21:
-                self.try_send_data(player, f"{OUTPUT_HEADER}The dealer went bust! The player won!")
+                self.try_send_data(player, f"{OUTPUT_HEADER}{Fore.BLUE}The dealer went bust! The player won!{Style.RESET_ALL}")
                 multipliers[player.name] = 1
             elif players_sum[player.name] == dealer_sum:
                 self.try_send_data(player,
-                                   f"{OUTPUT_HEADER}The player and dealer have the same number of points! A push occurred!")
+                                   f"{OUTPUT_HEADER}{Fore.YELLOW}The player and dealer have the same number of points! A push occurred!{Style.RESET_ALL}")
                 multipliers[player.name] = 0
             elif players_sum[player.name] > dealer_sum:
                 self.try_send_data(player,
-                                   f"{OUTPUT_HEADER}The player has more points than the dealer! The player won!")
+                                   f"{OUTPUT_HEADER}{Fore.BLUE}The player has more points than the dealer! The player won!{Style.RESET_ALL}")
                 multipliers[player.name] = 1
             elif players_sum[player.name] < dealer_sum:
                 self.try_send_data(player,
-                                   f"{OUTPUT_HEADER}The player has less points than the dealer! The dealer won!")
+                                   f"{OUTPUT_HEADER}{Fore.RED}The player has less points than the dealer! The dealer won!{Style.RESET_ALL}")
                 multipliers[player.name] = -1
 
             if special == 2:
@@ -326,16 +333,16 @@ class Blackjack:
             # returns the player multiplier by checking who the winner of the game is
             if player_sum[idx] == 21 and dealer_sum == 21:
                 self.try_send_data(player,
-                                   f"{OUTPUT_HEADER}The player and dealer both have a blackjack! A push occurred!")
+                                   f"{OUTPUT_HEADER}{Fore.YELLOW}The player and dealer both have a blackjack! A push occurred!{Style.RESET_ALL}")
                 player.status = "Push"
             if dealer_sum == 21:
                 self.try_send_data(player,
-                                   f"{OUTPUT_HEADER}The dealer has a blackjack! Any player who does not have a blackjack has instantly lost!")
+                                   f"{OUTPUT_HEADER}{Fore.RED}The dealer has a blackjack! Any player who does not have a blackjack has instantly lost!{Style.RESET_ALL}")
                 player.status = "Lost"
             if player_sum[idx] == 21:
                 self.try_send_data(player,
-                                   f"{OUTPUT_HEADER}The player has a blackjack and the dealer does not! "
-                                   f"The player gets payed out 3 to 2!")
+                                   f"{OUTPUT_HEADER}{Fore.YELLOW}The player has a blackjack and the dealer does not! "
+                                   f"The player gets payed out 3 to 2!{Style.RESET_ALL}")
                 player.status = "BlackJack"
 
     def broadcast(self, message_type):
@@ -347,7 +354,7 @@ class Blackjack:
                 str(p + 1) + ". " + self.players_list[p].name.ljust(15) + "$" + str(self.players_list[p].player_money)
                 for p
                 in range(len(self.players_list))]
-            board_data = "SCORE BOARD".center(30) + "\n" + "\n".join(name_and_money) + "\n"
+            board_data = "".rjust(10) + f"{Fore.GREEN}SCORE BOARD{Style.RESET_ALL}\n" + "\n".join(name_and_money) + "\n\n"
 
             broadcast_messsage = OUTPUT_HEADER + board_data
 
@@ -356,13 +363,16 @@ class Blackjack:
             players_action = [player.name + " -> " + player.status for player in
                               self.active_players]
             players_cards = [player.name + " -> " + str(player.player_cards) for player in self.active_players]
-            broadcast_messsage = OUTPUT_HEADER + "Players Turn Action\n" + "\n".join(players_action) + "\n"
-            broadcast_messsage += "Player's Cards\n" + "\n".join(players_cards) + "\n"
+            broadcast_messsage = OUTPUT_HEADER + "".rjust(10) + f"{Fore.GREEN}Players Turn Action{Style.RESET_ALL}\n" + "\n".join(players_action) + "\n\n"
+            broadcast_messsage += "".rjust(10) + f"{Fore.GREEN}Player's Cards{Style.RESET_ALL}\n" + "\n".join(players_cards) + "\n\n"
 
         elif message_type == "continue_quit":
             players_action = []
             quit_players = [player for player in self.players_list if
                             player not in self.active_players]
+            
+            if len(quit_players)==0:
+                return
 
             for player in quit_players:
                 if player in self.connected_players:
@@ -370,11 +380,11 @@ class Blackjack:
                 else:
                     players_action.append(player.name + " -> " + "Quit Game Completely (Or Disconnected)")
 
-            broadcast_messsage = OUTPUT_HEADER + "\nPlayers who quit Game\n" + "\n".join(players_action) + "\n"
+            broadcast_messsage = OUTPUT_HEADER + "".rjust(10) + f"{Fore.GREEN}Players who quit Game{Style.RESET_ALL}\n" + "\n".join(players_action) + "\n"
 
         elif message_type == "bet_amount":
             players_bet_amount = [player.name + " -> $" + str(self.bets[player.name]) for player in self.active_players]
-            broadcast_messsage = OUTPUT_HEADER + "\nPlayers Betting Money\n" + "\n".join(players_bet_amount) + "\n"
+            broadcast_messsage = OUTPUT_HEADER + "".rjust(10) + f"{Fore.GREEN}Players Betting Money{Style.RESET_ALL}\n" + "\n".join(players_bet_amount) + "\n"
 
         for player in self.connected_players:
             self.try_send_data(player, broadcast_messsage)
