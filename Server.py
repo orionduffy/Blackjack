@@ -55,11 +55,11 @@ def handle_late_connections(game_thread, players_list, allow_rejoins, allow_new_
                         found_player = True
 
                         print(f"Player {player.name} at IP {player.address} has rejoined the game")
-                        send_data(conn,
-                                  f"{OUTPUT_HEADER}You have successfully reconnected "
+                        try_send_data(player,
+                                  f"{Fore.GREEN}{OUTPUT_HEADER}You have successfully reconnected "
                                   f"and will keep your previous progress, "
                                   f"but the game has already started. "
-                                  f"You will have to wait until the next round starts to play!")
+                                  f"You will have to wait until the next round starts to play!{Style.RESET_ALL}")
                         break
 
                 if found_player:
@@ -71,21 +71,21 @@ def handle_late_connections(game_thread, players_list, allow_rejoins, allow_new_
                 players_list.append(new_player)
 
                 print(f"Player {new_player.name} at IP {new_player.address} has just joined the game")
-                send_data(conn,
-                          f"{OUTPUT_HEADER}You have successfully connected, "
+                try_send_data(new_player,
+                          f"{Fore.GREEN}{OUTPUT_HEADER}You have successfully connected, "
                           f"but the game has already started. "
-                          f"You will have to wait until the next round starts to play!")
+                          f"You will have to wait until the next round starts to play!{Style.RESET_ALL}")
             elif allow_rejoins:
                 send_data(conn,
-                          f"{OUTPUT_HEADER}Game has started without you. "
+                          f"{Fore.RED}{OUTPUT_HEADER}Game has started without you. "
                           f"New players are not allowed to join. "
-                          f"Try again later!!")
+                          f"Try again later!!{Style.RESET_ALL}")
                 send_data(conn, DISCONNECT_MESSAGE)
             else:
                 send_data(conn,
-                          f"{OUTPUT_HEADER}Game has started without you. "
+                          f"{Fore.RED}{OUTPUT_HEADER}Game has started without you. "
                           f"You can't join the game now. "
-                          f"Try again later!!")
+                          f"Try again later!!{Style.RESET_ALL}")
                 send_data(conn, DISCONNECT_MESSAGE)
         except socket.timeout:
             pass
@@ -118,7 +118,7 @@ def start():
             
             new_player = Player(pname, conn, addr)
             print(f"Player {new_player.name} has joined")
-            msg = OUTPUT_HEADER + F"{Fore.GREEN}{pname} please wait for the Game to start>>>>{Style.RESET_ALL}"
+            msg = OUTPUT_HEADER + f"{Fore.GREEN}{pname} please wait for the Game to start>>>>{Style.RESET_ALL}"
             
             send_data(conn, msg)
             players_list.append(new_player)
@@ -169,15 +169,15 @@ def early_start(should_start):
 def start_game(players_list, allow_rejoin, allow_new_joins):
     pause_game = [False]
     thread = threading.Thread(target=handle_clients, args=(players_list,))
-    thread_reject = threading.Thread(target=handle_late_connections, args=(thread,
+    thread_late_conn = threading.Thread(target=handle_late_connections, args=(thread,
                                                                            players_list,
                                                                            allow_rejoin,
                                                                            allow_new_joins))
     print(f"{Fore.GREEN}Game Starting ....{Style.RESET_ALL}")
     thread.start()
-    thread_reject.start()
+    thread_late_conn.start()
     thread.join()
-    thread_reject.join()
+    thread_late_conn.join()
     print(f"{Fore.GREEN}Game End...Server Shutting down{Style.RESET_ALL}")
 
 
@@ -223,7 +223,7 @@ if __name__ == '__main__':
         print(f"{Fore.GREEN}[STARTING] server is starting...{Style.RESET_ALL}")
         start()
     except UserWarning as e:
-        print(f"Exception occurred: {e}")
+        print(f"{Fore.RED}Exception occurred: {e}{Style.RESET_ALL}")
     except Exception as e:
-        print(f"Exception occurred: {e}")
+        print(f"{Fore.RED}Exception occurred: {e}{Style.RESET_ALL}")
         # TODO: Finish this
