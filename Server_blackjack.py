@@ -13,10 +13,6 @@ from colorama import Fore,Style
 
 
 HEADER = 64
-PORT = 5050
-# SERVER = "172.19.93.54"
-SERVER = socket.gethostbyname(socket.gethostname())
-ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 QUESTION_HEADER_CHOICE = "CHOOCE\n"
