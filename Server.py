@@ -56,7 +56,7 @@ def handle_late_connections(game_thread, players_list, allow_rejoins, allow_new_
 
                         print(f"Player {player.name} at IP {player.address} has rejoined the game")
                         try_send_data(player,
-                                  f"{Fore.GREEN}{OUTPUT_HEADER}You have successfully reconnected "
+                                  f"{OUTPUT_HEADER}{Fore.GREEN}You have successfully reconnected "
                                   f"and will keep your previous progress, "
                                   f"but the game has already started. "
                                   f"You will have to wait until the next round starts to play!{Style.RESET_ALL}")
@@ -72,18 +72,18 @@ def handle_late_connections(game_thread, players_list, allow_rejoins, allow_new_
 
                 print(f"Player {new_player.name} at IP {new_player.address} has just joined the game")
                 try_send_data(new_player,
-                          f"{Fore.GREEN}{OUTPUT_HEADER}You have successfully connected, "
+                          f"{OUTPUT_HEADER}{Fore.GREEN}You have successfully connected, "
                           f"but the game has already started. "
                           f"You will have to wait until the next round starts to play!{Style.RESET_ALL}")
             elif allow_rejoins:
                 send_data(conn,
-                          f"{Fore.RED}{OUTPUT_HEADER}Game has started without you. "
+                          f"{OUTPUT_HEADER}{Fore.RED}Game has started without you. "
                           f"New players are not allowed to join. "
                           f"Try again later!!{Style.RESET_ALL}")
                 send_data(conn, DISCONNECT_MESSAGE)
             else:
                 send_data(conn,
-                          f"{Fore.RED}{OUTPUT_HEADER}Game has started without you. "
+                          f"{OUTPUT_HEADER}{Fore.RED}Game has started without you. "
                           f"You can't join the game now. "
                           f"Try again later!!{Style.RESET_ALL}")
                 send_data(conn, DISCONNECT_MESSAGE)
