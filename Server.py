@@ -7,6 +7,7 @@ from Server_blackjack import Blackjack
 from Server_Player_Info import Player
 import logging
 import multiprocessing
+# The idea to use input timeouts was gained from professor Jamal Bouajjaj
 from inputimeout import inputimeout, TimeoutOccurred
 
 # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
@@ -258,6 +259,7 @@ def validate_no_players(text):
 def print_above(msg, up_amount=1, newline_amount=1):
     """
     Based off https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input
+    Mostly copied from professor Jamal Bouajjaj
 
     This does the following codes, in order:
         - save cursor position
