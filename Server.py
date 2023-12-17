@@ -7,6 +7,7 @@ from Server_blackjack import Blackjack
 from Server_Player_Info import Player
 import logging
 import multiprocessing
+from inputimeout import inputimeout, TimeoutOccurred
 
 # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
 from colorama import init as colorama_init
@@ -95,7 +96,7 @@ def start():
     server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
     players_list = []
-    no_players = int(questionary.text("Please enter number of players:", validate=validate_no_players).ask())
+    no_players = int(questionary.text("How many players are you expecting?", validate=validate_no_players).ask())
 
     allow_rejoin = questionary \
         .confirm("Would you like to allow players to rejoin in between games if they disconnected?").ask()
@@ -121,18 +122,18 @@ def start():
             pname = receive_data(conn) + str(len(players_list))
             
             new_player = Player(pname, conn, addr)
-            print(f"Player {new_player.name} has joined")
+            print_above(f"Player {new_player.name} has joined")
             msg = OUTPUT_HEADER + f"{Fore.GREEN}{pname}, please wait for the game to start>>>>{Style.RESET_ALL}"
             
             send_data(conn, msg)
             players_list.append(new_player)
         except socket.error as e:
-            print(f"{Fore.RED}An error occurred with the connection. "
+            print_above(f"{Fore.RED}An error occurred with the connection. "
                   f"Dropping them from the list of connected players{Style.RESET_ALL}")
             continue
 
         connected_players = list(filter(lambda person: person.connected, players_list))
-        print(f"{Fore.BLUE}There are now {len(connected_players)} players{Style.RESET_ALL}")
+        print_above(f"{Fore.BLUE}There are now {len(connected_players)} players{Style.RESET_ALL}")
 
         lobbymsg = OUTPUT_HEADER + f"{Fore.BLUE}{new_player.name} has joined the lobby. " \
                                    f"There are now {len(connected_players)} players. " \
@@ -167,7 +168,7 @@ def start():
         #     early_thread = threading.Thread(target=early_start, args=(should_start,))
         #     early_thread.daemon = True
         #     early_thread.start()
-
+    early_thread.join()
     start_game(players_list, allow_rejoin, allow_new_joins)
 
 
@@ -175,17 +176,28 @@ def early_start(should_start, players_list):
     # should_start[0] = questionary \
     #     .confirm("Would you like to start the game early? "
     #              "Note: A response to this question is not needed if the answer is not \"Yes\"").ask()
-    input("Press the enter key at any time to start the game early\n")
+    msg = "Press the enter key at any time to start the game early. "
 
-    if not should_start[0]:
-        connected_list = list(filter(lambda person: person.connected, players_list))
-        alert = OUTPUT_HEADER + f"{Fore.GREEN}The game is starting early. " \
-                                f"There are {len(connected_list)} players participating.{Style.RESET_ALL}"
+    try:
+        inputimeout(msg, timeout=1)
+    except TimeoutOccurred:
+        pass
 
-        for player in connected_list:
-            try_send_data(player, alert)
+    while not should_start[0]:
+        try:
+            inputimeout(f"\x1b[1F{msg}", timeout=1)
+        except TimeoutOccurred:
+            continue
 
-        should_start[0] = True
+        if not should_start[0]:
+            connected_list = list(filter(lambda person: person.connected, players_list))
+            alert = OUTPUT_HEADER + f"{Fore.GREEN}The game is starting early. " \
+                                    f"There are {len(connected_list)} players participating.{Style.RESET_ALL}"
+
+            for player in connected_list:
+                try_send_data(player, alert)
+
+            should_start[0] = True
 
 
 def start_game(players_list, allow_rejoin, allow_new_joins):
@@ -203,13 +215,17 @@ def start_game(players_list, allow_rejoin, allow_new_joins):
     print(f"{Fore.GREEN}Game End...Server Shutting down{Style.RESET_ALL}")
 
 
-def try_send_data(player, msg):
+def try_send_data(player, msg, pre_game=False):
     try:
         send_data(player.conn, msg)
         return True
     except socket.error as e:
-        print(f"{Fore.RED}An error occurred with the connection to {player.name}. "
-              f"Dropping them from the list of connected players{Style.RESET_ALL}")
+        msg = f"{Fore.RED}An error occurred with the connection to {player.name}. " \
+              f"Dropping them from the list of connected players{Style.RESET_ALL}"
+        if not pre_game:
+            print(msg)
+        else:
+            print_above(msg)
         player.connected = False
         return False
 
@@ -237,6 +253,21 @@ def validate_no_players(text):
         return True
     else:
         return "Invalid input. Please enter a valid number."
+
+
+def print_above(msg, up_amount=1, newline_amount=1):
+    """
+    Based off https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input
+
+    This does the following codes, in order:
+        - save cursor position
+        - move cursor up one line at the start
+        - scroll up terminal by 1
+        - Add a new line (this command seems to be obscure?)
+        - print the message
+        - go back to saved position
+    """
+    print(f"\x1b[s\x1b[{up_amount}F\x1b[S\x1b[{newline_amount}L"+msg+"\x1b[u", end="",flush=True)
 
 
 if __name__ == '__main__':
