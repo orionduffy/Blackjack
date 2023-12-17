@@ -106,6 +106,10 @@ def start():
 
     should_start = [False]
 
+    early_thread = threading.Thread(target=early_start, args=(should_start, players_list))
+    early_thread.daemon = True
+    early_thread.start()
+
     while not should_start[0]:
         server.settimeout(1)
         try:
@@ -118,7 +122,7 @@ def start():
             
             new_player = Player(pname, conn, addr)
             print(f"Player {new_player.name} has joined")
-            msg = OUTPUT_HEADER + f"{Fore.GREEN}{pname} please wait for the Game to start>>>>{Style.RESET_ALL}"
+            msg = OUTPUT_HEADER + f"{Fore.GREEN}{pname}, please wait for the game to start>>>>{Style.RESET_ALL}"
             
             send_data(conn, msg)
             players_list.append(new_player)
@@ -151,6 +155,13 @@ def start():
                 try_send_data(player, discmsg)
 
         if len(connected_players) == no_players:
+            connected_players = list(filter(lambda person: person.connected, players_list))
+            alert = OUTPUT_HEADER + f"{Fore.GREEN}The lobby is full. " \
+                                    f"The game is starting with {len(connected_players)} players.{Style.RESET_ALL}"
+
+            for player in connected_players:
+                try_send_data(player, alert)
+
             should_start[0] = True
         # else:
         #     early_thread = threading.Thread(target=early_start, args=(should_start,))
@@ -160,10 +171,21 @@ def start():
     start_game(players_list, allow_rejoin, allow_new_joins)
 
 
-def early_start(should_start):
-    should_start[0] = questionary \
-        .confirm("Would you like to start the game early? "
-                 "Note: A response to this question is not needed if the answer is not \"Yes\"").ask()
+def early_start(should_start, players_list):
+    # should_start[0] = questionary \
+    #     .confirm("Would you like to start the game early? "
+    #              "Note: A response to this question is not needed if the answer is not \"Yes\"").ask()
+    input("Press the enter key at any time to start the game early\n")
+
+    if not should_start[0]:
+        connected_list = list(filter(lambda person: person.connected, players_list))
+        alert = OUTPUT_HEADER + f"{Fore.GREEN}The game is starting early. " \
+                                f"There are {len(connected_list)} players participating.{Style.RESET_ALL}"
+
+        for player in connected_list:
+            try_send_data(player, alert)
+
+        should_start[0] = True
 
 
 def start_game(players_list, allow_rejoin, allow_new_joins):
