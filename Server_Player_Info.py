@@ -1,8 +1,9 @@
 
 class Player:
 
-    def __init__(self, pname, connection, address, mid_join=False):
-        self.name = pname
+    def __init__(self, pname, pindex, connection, address, mid_join=False):
+        self.name = pname + str(pindex)
+        self.pname = pname
         # The socket stores the address and port in the same tuple.
         # By doing address[0], other parts only have to send the tuple without worrying about specifically sending
         self.address = address[0]

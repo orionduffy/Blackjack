@@ -52,7 +52,7 @@ def handle_late_connections(game_thread, players_list, allow_rejoins, allow_new_
             if allow_rejoins:
                 found_player = False
                 for player in players_list:
-                    if not player.connected and player.address == addr[0] and player.name[:-1] == base_name:
+                    if not player.connected and player.address == addr[0] and player.pname == base_name:
                         player.handle_mid_join(conn)
                         found_player = True
 
@@ -116,13 +116,16 @@ def start():
         .confirm("Would you like to allow players to rejoin in between games if they disconnected?").ask()
     allow_new_joins = questionary \
         .confirm("Would you like to allow new players to join in between games?").ask()
-    
+
     if allow_new_joins:
         hard_cap = questionary.confirm("Would you like to set a maximum number of players?").ask()
-        if hard_cap:
-            hard_cap = questionary.text("What is the maximum number of players you want to allow to join your game?",
-                                        validate=validate_no_players).ask()
-            hard_cap = int(hard_cap)
+    else:
+        hard_cap = False
+
+    if hard_cap:
+        hard_cap = questionary.text("What is the maximum number of players you want to allow to join your game?",
+                                    validate=validate_no_players).ask()
+        hard_cap = int(hard_cap)
 
     print(f"{Fore.GREEN}Waiting for players to join...{Style.RESET_ALL}")
 
@@ -140,9 +143,9 @@ def start():
             continue
 
         try:
-            pname = receive_data(conn) + str(len(players_list))
+            pname = receive_data(conn)
 
-            new_player = Player(pname, conn, addr)
+            new_player = Player(pname, len(players_list), conn, addr)
             print_above(f"Player {new_player.name} has joined")
             msg = OUTPUT_HEADER + f"{Fore.GREEN}{pname}, please wait for the game to start>>>>{Style.RESET_ALL}"
 
@@ -271,9 +274,10 @@ def receive_data(conn):
 
 
 def validate_no_players(text):
-    if text.isdigit():
+    try:
+        int(text)
         return True
-    else:
+    except ValueError:
         return "Invalid input. Please enter a valid number."
 
 
