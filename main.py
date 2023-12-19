@@ -9,7 +9,7 @@ import logging
 
 # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
 from colorama import init as colorama_init
-from colorama import Fore,Style
+from colorama import Fore, Style
 
 
 # Runs a game of Blackjack
@@ -47,6 +47,16 @@ def main():
 
 
 def validate_IP(ip):
+    """
+    This function checks if the input text is a valid ip address.
+    
+     Args:
+          ip (String): input text
+
+    Returns:
+            boolean: True if input ip is valid else it return a string to notify input ip is not valid.
+
+    """
     if len(ip) > 0:
         ip.strip()
 

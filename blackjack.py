@@ -2,12 +2,14 @@ import questionary
 from deck import Deck
 
 from colorama import init as colorama_init
-from colorama import Fore,Style
+from colorama import Fore, Style
 
 
 # The main class for running the Blackjack game. Game will continue until the player either quits or runs out of money
 class Blackjack:
+    """This class Blackjack game class for single player."""
     def __init__(self):
+        """This function initialize the player money to $100 and set the environment ready to start game."""
         self.player_money: int = 100
         self.min_bet: int = 5
 
@@ -19,6 +21,13 @@ class Blackjack:
 
     # Runs the main game loop, which potentially includes several rounds
     def run(self):
+        """
+        This function get the betting amount from player before every game \
+        started and calls the run_round function to handle the action of \
+        player in every round. After single game is over, it adds or reducts the \
+        won/loss amount to player's money. The Game re-runs till the players quits.
+        """
+
         choices = ["Continue", "Quit"]
         choice = choices[0]
 
@@ -41,6 +50,7 @@ class Blackjack:
         print(f"{Fore.GREEN}Thank you for playing. You left with ${self.player_money}{Style.RESET_ALL}")
 
     def reset_game(self):
+        """This function reset some game variables before new game is started."""
         self.shuffled_deck = self.deck.shuffle_deck()
 
         self.player_cards = []
@@ -49,7 +59,11 @@ class Blackjack:
     # Runs the loop for an individual rounds,
     # which at a basic level involves drawing new cards until the player stops or goes over 21
     def run_round(self):
-
+        """
+        This function handles the actions of a players done after each round
+        and does the necessary action based on that.
+        """
+        
         for i in range(2):
             self.player_cards.append(self.shuffled_deck.pop(0))
 
@@ -109,6 +123,16 @@ class Blackjack:
 
     # Handles a normal ending of the game
     def game_end(self, special=0):
+        """
+        This function checks if a player won/lost after the game is over
+        and calculates the bet multiplier amount for the player.
+        
+        Args:
+            special (int, default=0): index of choice of player from the choice provided 
+
+        Returns:
+                int: multiplier to the betting amount
+        """ 
         player_won = 0
         print(
             f"The dealer has {self.deck.sum_cards(self.dealer_cards)} points and the player has {self.deck.sum_cards(self.player_cards)} points!")
@@ -138,6 +162,8 @@ class Blackjack:
 
     # Handles ending the game if someone got a blackjack
     def blackjack_end(self):
+        """This function checks if there is a blackjack win after the first two cards are given to the player."""
+        
         player_won = 0
 
         if self.deck.sum_cards(self.player_cards) == 21 and self.deck.sum_cards(self.dealer_cards) == 21:
@@ -154,6 +180,14 @@ class Blackjack:
 
     # Handles the text validation when a user attempts to make a bet
     def validate_bet(self, text):
+        """This function checks the input data provided to see if the player has sufficient money for the bet.
+    
+        Args:
+            text (String): input text
+
+        Returns:
+                boolean: True if text is enough amount for the bet else it return a string to notify bet is invalid.
+        """
         try:
             bet = int(text)
             if bet > self.player_money:
