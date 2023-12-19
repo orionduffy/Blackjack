@@ -8,8 +8,8 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
-!Blackjack/docs/_build/
+#build/
+#!Blackjack/docs/_build/
 
 
 develop-eggs/
