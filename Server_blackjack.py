@@ -75,14 +75,17 @@ class Blackjack:
         multipliers = self.run_round()
         self.reset_game()
 
+        win_or_loss_amt = {}
+
         for player in self.active_players:
             player.player_money += self.bets[player.name] * multipliers[player.name]
+            win_or_loss_amt[player] = self.bets[player.name] * multipliers[player.name]
             player.player_money = int(player.player_money)
             self.try_send_data(player,
                                f"{OUTPUT_HEADER}{Fore.BLUE}You now have ${player.player_money}!{Style.RESET_ALL}")
 
         # Broadcasting the Score board after every game
-        self.broadcast('score_board')
+        self.broadcast('score_board', win_or_loss_amt)
 
         # going for the next round and asking the player if they want to play or not
         for player in self.active_players:
@@ -411,7 +414,7 @@ class Blackjack:
                                    f"The player gets payed out 3 to 2!{Style.RESET_ALL}")
                 player.status = "BlackJack"
 
-    def broadcast(self, message_type):
+    def broadcast(self, message_type, win_or_loss_amt={}):
         """
         This function sends a broadcast message to all players.
         
@@ -419,18 +422,33 @@ class Blackjack:
             message_type (String): one of these values ["score_board", "turn_action", "continue_quit", "bet_amount"]
 
         """
+        def display_help(win_or_loss_amt, player):
+            res = (str(win_or_loss_amt[player]) if player in win_or_loss_amt else "not playing").ljust(20)
+            if res!="not playing         ":
+                if int(res)>=0:
+                    return f"{Fore.GREEN} +{res}{Style.RESET_ALL}"
+                return f"{Fore.RED} {res}{Style.RESET_ALL}"
+            return res
+
         if message_type == "score_board":
             # sorting players list according to thier final money amount
             self.players_list.sort(key=lambda x: x.player_money, reverse=True)
 
             name_and_money = [
-                str(p + 1) + ". " + self.players_list[p].name.ljust(15) + "$" + str(self.players_list[p].player_money)
+                str(p + 1) + ". " + self.players_list[p].name.ljust(20) + "$" + \
+                    str(self.players_list[p].player_money).ljust(20) + \
+                    display_help(win_or_loss_amt, self.players_list[p])
+                    
                 for p
                 in range(len(self.players_list))]
-            board_data = "".rjust(10) + f"{Fore.GREEN}SCORE BOARD{Style.RESET_ALL}\n" + "\n".join(
-                name_and_money) + "\n\n"
+
+            board_data = "".rjust(30) + f"{Fore.GREEN}SCORE BOARD{Style.RESET_ALL}\n"
+            board_data += "   Name".ljust(20) + "Total Money".ljust(20) + "Last Game win/loss Amt".center(20) + "\n"
+            board_data += "\n".join(name_and_money) + "\n\n"
 
             broadcast_messsage = OUTPUT_HEADER + board_data
+
+            win_or_loss_amt={}
 
         elif message_type == "turn_action":
             logging.debug("Player status: " + str([player.status for player in self.active_players]))
@@ -466,6 +484,7 @@ class Blackjack:
 
         for player in self.connected_players:
             self.try_send_data(player, broadcast_messsage)
+
 
     # send_data and receive_data can fail if the connection is broken.
     # try_send_data and try_receive_data exist to handle that, and should be used instead.

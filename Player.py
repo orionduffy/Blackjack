@@ -67,7 +67,6 @@ class Player:
         """This function try to send data/msg using the send_data function to player and the exceptions are handled here.
     
         Args:
-            player (Player): Player object to which the msg is going to be delivered to \n
             msg (String): The message to be sent to the player \n
         
         Returns:
@@ -78,9 +77,9 @@ class Player:
             return True
         except socket.error as e:
             logging.error(f"Error sending data to server: {e}")
-            print(f"{Fore.RED}An error occurred with the server connection when attempting to send data.{Style.RESET_ALL}")
+            print(f"{Fore.RED}An error occurred with the server connection when attempting to send data. Closing Connection.{Style.RESET_ALL}")
             self.client.close()
-            return False
+            # return False
 
     def send_data(self, msg):
         """This function encode the msg and send it to a server conn
@@ -108,9 +107,9 @@ class Player:
             return self.receive_data()
         except socket.error as e:
             logging.error(f"Error receiving data from server: {e}")
-            print(f"{Fore.RED}An error occurred with the server connection when attempting to receive data.{Style.RESET_ALL}")
+            print(f"{Fore.RED}An error occurred with the server connection when attempting to receive data. Closing Connection.{Style.RESET_ALL}")
             self.client.close()
-            return None
+            # return None
 
     def receive_data(self):
         """This function receive data/msg from the server directed to the client.
