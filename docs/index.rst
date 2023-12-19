@@ -3,6 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. Partially the code was taken from Professor Jamal lectures
+
 Welcome to Blackjack Class Project's documentation!
 ===================================================
 
@@ -65,10 +67,6 @@ BLACKJACK.main module
    :members:
    :undoc-members:
    :show-inheritance:
-
-   
-
-
 
 
 Indices and tables
