@@ -34,10 +34,12 @@ def main():
             print(f"{Fore.RED}Exception occurred: {e}{Style.RESET_ALL}")
         except ConnectionRefusedError as e:
             logging.exception(f"{Fore.RED}ConnectionRefusedError: {e}{Style.RESET_ALL}")
-            print(f"{Fore.RED}The connection was refused by the server. The server may be down, or the port may not be forwarded{Style.RESET_ALL}")
+            print(f"{Fore.RED}The connection was refused by the server. "
+                  f"The server may be down, or the port may not be forwarded{Style.RESET_ALL}")
         except ConnectionResetError as e:
             logging.exception(f"{Fore.RED}ConnectionResetError: {e}{Style.RESET_ALL}")
-            print(f"{Fore.RED}The connection was reset. The server may have gone down, or you may have lost internet connection{Style.RESET_ALL}")
+            print(f"{Fore.RED}The connection was reset. "
+                  f"The server may have gone down, or you may have lost internet connection{Style.RESET_ALL}")
         except socket.error as e:
             logging.exception(f"{Fore.RED}Socket error: {e}{Style.RESET_ALL}")
             print(f"{Fore.RED}An error occurred with the socket connection. Error: {e}{Style.RESET_ALL}")
@@ -55,11 +57,11 @@ def validate_IP(ip):
 
     Returns:
             boolean: True if input ip is valid else it return a string to notify input ip is not valid.
-
     """
     if len(ip) > 0:
         ip.strip()
-
+    if ip == "localhost":
+        return True
     ip_split = ip.split('.')
     if len(ip_split) == 4 and len(ip_split[0]) > 0 \
             and len(ip_split[1]) > 0 \
