@@ -2,7 +2,7 @@
 class Player:
     """This class holds information about the player is maintained by the server class."""
 
-    def __init__(self, pname, connection, address, mid_join=False):
+    def __init__(self, pname, pindex, connection, address, mid_join=False):
         """This __init__function initialize the Player objects.
 
         Args:
@@ -12,7 +12,8 @@ class Player:
             mid_join (boolean, default=False): if player is joining after the game is started\n
 
         """
-        self.name = pname
+        self.name = pname + str(pindex)
+        self.pname = pname
         # The socket stores the address and port in the same tuple.
         # By doing address[0], other parts only have to send the tuple without worrying about specifically sending
         self.address = address[0]
