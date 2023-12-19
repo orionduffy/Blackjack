@@ -8,8 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-#build/
-#!Blackjack/docs/_build/
+build/
 
 
 develop-eggs/
@@ -72,7 +71,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+!docs/_build/
 
 # PyBuilder
 .pybuilder/
