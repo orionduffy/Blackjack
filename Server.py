@@ -1,5 +1,4 @@
 import questionary
-from deck import Deck
 import socket
 import threading
 import pdb
@@ -33,6 +32,12 @@ server.bind(ADDR)
 
 
 def handle_clients(players_list):
+    """""This function starts the Blackjack game with list of players and gracefully closes the connection of players after the game is over.
+
+    Args:
+        players_list (list): List of Player objects which reprsents every players
+    
+    """
     blackjack = Blackjack(players_list)
     blackjack.run()
     connected_players = list(filter(lambda person: person.connected, players_list))
@@ -42,6 +47,18 @@ def handle_clients(players_list):
 
 
 def handle_late_connections(game_thread, players_list, allow_rejoins, allow_new_joins):
+    """This function handles players who joined the lobby after the blackjack game is started.
+    
+    Args:
+        game_thread (Thread): Current thread of the ongoing game\n
+        players_list (list): List of Player objects playing the current game\n
+        allow_rejoins (boolean): True if rejoins are allowed after player got disconneted for any reason otherwise False\n
+        allow_new_joins (boolean): True if new players are allowed to join the game after it has started otherwise False\n
+
+    No Returns:
+
+    """
+
     # https://docs.python.org/3/library/socket.html#timeouts-and-the-accept-method
     server.settimeout(1)
 
@@ -94,6 +111,7 @@ def handle_late_connections(game_thread, players_list, allow_rejoins, allow_new_
 
 
 def start():
+    """This function initiate the server to listen and after players are joined, it call the start_game function to start game. early_start function is also called in here if the early start of the game is needed."""
     server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
     players_list = []
@@ -165,15 +183,20 @@ def start():
                 try_send_data(player, alert)
 
             should_start[0] = True
-        # else:
-        #     early_thread = threading.Thread(target=early_start, args=(should_start,))
-        #     early_thread.daemon = True
-        #     early_thread.start()
     early_thread.join()
     start_game(players_list, allow_rejoin, allow_new_joins)
 
 
 def early_start(should_start, players_list):
+    """This function gives the ability of early staring the game if needed by the server.
+    
+    Args:
+        should_start (boolean): True if the game is need to start early, otherwise False\n
+        players_list (list): List of Player objects waiting to the game start_game\n
+    
+    No Return:
+    """
+
     # should_start[0] = questionary \
     #     .confirm("Would you like to start the game early? "
     #              "Note: A response to this question is not needed if the answer is not \"Yes\"").ask()
@@ -202,6 +225,15 @@ def early_start(should_start, players_list):
 
 
 def start_game(players_list, allow_rejoin, allow_new_joins):
+    """This function start the handl_clients and handle_late_connections threads and shutdown the server after the game is over and the players are gracefully disconneted.
+
+    Args:
+        players_list (list): List of Player objects waiting for the game to start\n
+        allow_rejoins (boolean): True if rejoins are allowed after player got disconneted for any reason otherwise False\n
+        allow_new_joins (boolean): True if new players are allowed to join the game after it has started otherwise False\n
+    
+    No Return
+    """
     pause_game = [False]
     thread = threading.Thread(target=handle_clients, args=(players_list,))
     thread_late_conn = threading.Thread(target=handle_late_connections, args=(thread,
@@ -217,6 +249,16 @@ def start_game(players_list, allow_rejoin, allow_new_joins):
 
 
 def try_send_data(player, msg, pre_game=False):
+    """This function try to send data using the send_data function to player and the exceptions are handled here.
+    
+    Args:
+        player (Player): Player object to which the msg is going to be delivered\n
+        msg (String): The message to be sent to the player\n
+        pre_game=False (boolean): used to specify the msg print position on the server terminal\n
+    
+    Returns:
+            boolean: True if succefully msg is sent, otherwise it return False
+    """
     try:
         send_data(player.conn, msg)
         return True
@@ -232,6 +274,14 @@ def try_send_data(player, msg, pre_game=False):
 
 
 def send_data(conn, msg):
+    """This function encode the msg and send it to a player's conn information
+    
+    Args:
+        conn (socket): socket object usable to send and receive data/msg\n
+        msg (String): The message to be sent to the player\n
+
+    No Return.
+    """
     message = msg.encode(FORMAT)
     msg_length = len(message)
     send_length = str(msg_length).encode(FORMAT)
@@ -241,6 +291,14 @@ def send_data(conn, msg):
 
 
 def receive_data(conn):
+    """This function receive data/msg from the clients directed to the server.
+    
+    Args:
+        conn (socket): socket object usable to send and receive data/msg
+
+    Returns:
+           string: The data/msg received from the client or raises an error if Failed to receive data
+    """
     msg_length = conn.recv(HEADER).decode(FORMAT)
     if msg_length:
         msg_length = int(msg_length)
@@ -250,6 +308,14 @@ def receive_data(conn):
 
 
 def validate_no_players(text):
+    """This function validated the input data provided if it a number.
+    
+    Args:
+        text (String): input text
+
+    Returns:
+            boolean: True if text is digit else it return a string to notify text is not string.
+    """
     if text.isdigit():
         return True
     else:

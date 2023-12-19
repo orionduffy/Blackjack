@@ -24,7 +24,14 @@ colorama_init()
 
 # The main class for running the Blackjack game. Game will continue until the player either quits or runs out of money
 class Blackjack:
+    """This class is the Multiplayer Blackjack class hosted by the server."""
     def __init__(self, players):
+        """This function initializes the Multiplayer Blackjack class with the list of Player objects.
+        
+        Args:
+            players (list): List of Player objects waiting to play the game\n
+
+        """
         self.min_bet: int = 5
 
         self.deck = Deck()
@@ -43,6 +50,7 @@ class Blackjack:
         logging.debug("Blackjack class initialized")
 
     def refresh_player_lists(self):
+        """This function filters the players who are currently connected and those who want to continue playing."""
         self.connected_players = list(filter(lambda player: player.connected, self.players_list))
         # The active player list must always be filtered from the connected player list,
         # because disconnects might not change player.active to false.
@@ -50,6 +58,10 @@ class Blackjack:
 
     # Runs the main game loop, which potentially includes several rounds
     def run(self):
+        """This function get the betting amount from every player before every game \
+            started and calls the run_round function to handle the action of every \
+            player in every round. After single game is over, it adds or reducts the \
+            won/loss amount to every player's money. The Game re-runs till the active players is 0."""
         self.refresh_player_lists()
 
         # def subFunction(self):
@@ -98,7 +110,7 @@ class Blackjack:
     # Runs the loop for an individual rounds,
     # which at a basic level involves drawing new cards until the player stops or goes over 21
     def run_round(self):
-
+        """This function handles the actions of every players done after each round and do the necessary action based on that."""
         for i in range(2):
             self.dealer_cards.append(self.shuffled_deck.pop(0))
             for player in self.active_players:
@@ -179,25 +191,50 @@ class Blackjack:
         #     return self.blackjack_end()
 
     def reset_game(self):
+        """This function reset some game variables before new game is started."""
         self.shuffled_deck = self.deck.shuffle_deck()
 
         for pl in self.players_list: pl.initialize_new_game()
         self.dealer_cards = []
 
     def print_player_info(self, player):
+        """This function sends the players' current game info to the client.
+        
+        Args:
+            player (Player): object of Player class
+
+        Returns:
+                boolean: True if sending the data was sucessful else False
+        """
         response = self.try_send_data(player,
                                       f"{OUTPUT_HEADER}{Fore.YELLOW}Your cards{Style.RESET_ALL}: {player.player_cards} \n"
                                       f"{Fore.YELLOW}Player Sum{Style.RESET_ALL}: {self.deck.sum_cards(player.player_cards)}")
         return response
 
-    def print_dealer_info(self, ind):
-        response = self.try_send_data(ind,
+    def print_dealer_info(self, player):
+        """This function sends the dealer's current game info to the client.
+        
+        Args:
+            player (Player): object of Player class
+
+        Returns:
+                boolean: True if sending the data was sucessful else False
+        """
+        response = self.try_send_data(player,
                                       f"{OUTPUT_HEADER}{Fore.YELLOW}Dealer cards{Style.RESET_ALL}: {self.dealer_cards} \n"
                                       f"{Fore.YELLOW}Dealer sum{Style.RESET_ALL}: {self.deck.sum_cards(self.dealer_cards)}")
         return response
 
     # handles the process of getting bet amount from the players
     def thread1(self, player):
+        """This function get the current game betting amount and handles the exception if error occured.
+        
+        Args:
+            player (Player): object of Player class
+
+        Returns:
+                boolean: True if getting the bettting amount was sucessful else False
+        """
         response = self.try_send_data(player, f"{OUTPUT_HEADER}{Fore.BLUE}You have ${player.player_money} to bet with!{Style.RESET_ALL}")
         if not response:
             self.bets.pop(player.name)
@@ -228,6 +265,14 @@ class Blackjack:
 
     # handles the process of getting the player's turn choice and do the relevant action
     def thread2(self, player, first_round, choices):
+        """This function get player's turn action of a round.
+        
+        Args:
+            player (Player): object of Player class\n
+            first_round (boolean): True if it is the first round of a game otherwise False\n
+            choices (list): List of option a player can choose in every round.\n
+
+        """ 
         if first_round:
             content = QUESTION_HEADER_CHOICE + ",".join(choices)
         else:
@@ -243,6 +288,12 @@ class Blackjack:
 
     # Handles if the player wants to continue or quit
     def thread3(self, player):
+        """This function handles the player's action after the game is over and asks the player what they want to do next.
+        
+        Args:
+            player (Player): object of Player class
+
+        """ 
         choices = ["Continue", "Stop Betting", "Quit Game Completely"]
         choice = ""
         response = True
@@ -274,6 +325,14 @@ class Blackjack:
 
     # Handles a normal ending of the game
     def game_end(self, choices):
+        """This function check if a player won/lost after the game is over and calculates the mulitpliers amount for every player.
+        
+        Args:
+            choices (list): List of option a player can choose in every round.
+
+        Returns:
+                list of int: multipliers to the betting amount
+        """ 
         multipliers = {player.name: 0 for player in self.active_players}
         dealer_sum = self.deck.sum_cards(self.dealer_cards)
         players_sum = {player.name: self.deck.sum_cards(player.player_cards) for player in self.active_players}
@@ -321,7 +380,7 @@ class Blackjack:
 
     # Handles ending the game if someone got a blackjack
     def blackjack_check(self):
-
+        """This function checks if there is a blackjack win after the first two cards are given for every player."""
         dealer_sum = self.deck.sum_cards(self.dealer_cards)
         player_sum = [self.deck.sum_cards(player.player_cards) for player in self.active_players]
 
@@ -342,6 +401,12 @@ class Blackjack:
                 player.status = "BlackJack"
 
     def broadcast(self, message_type):
+        """This function sends broadcast message to all players.
+        
+        Args:
+            message_type (String): one of these values ["score_board", "turn_action", "continue_quit", "bet_amount"]
+
+        """
         if message_type == "score_board":
             # sorting players list according to thier final money amount
             self.players_list.sort(key=lambda x: x.player_money, reverse=True)
@@ -391,6 +456,15 @@ class Blackjack:
     # and return False or None if it fails, or the message or True if it succeeds
     # This way, you can simply end the thread if the response is not something that counts as true in an if statement
     def try_send_data(self, player, msg):
+        """This function try to send data/msg using the send_data function to player and the exceptions are handled here.
+    
+        Args:
+            player (Player): Player object to which the msg is going to be delivered to\n
+            msg (String): The message to be sent to the player\n
+        
+        Returns:
+                boolean: True if succefully msg is sent, otherwise it return False
+        """
         try:
             self.send_data(player, msg)
             return True
@@ -408,6 +482,14 @@ class Blackjack:
             return False
 
     def send_data(self, player, msg):
+        """This function encode the msg and send it to a player's conn information
+    
+        Args:
+            conn (socket): socket object usable to send and receive data/msg\n
+            msg (String): The message to be sent to the player\n
+
+        No Return.
+        """
         message = msg.encode(FORMAT)
         msg_length = len(message)
         send_length = str(msg_length).encode(FORMAT)
@@ -416,6 +498,14 @@ class Blackjack:
         player.conn.sendall(message)
 
     def try_receive_data(self, player):
+        """This function try to receive data/msg using the receive_data function from player and the exceptions are handled here.
+    
+        Args:
+            player (Player): Player object to which the msg is going to be delivered to\n
+        
+        Returns:
+               string: The data/msg received from the client or none if Failed to receive data
+        """
         try:
             return self.receive_data(player)
         except socket.error as e:
@@ -433,6 +523,14 @@ class Blackjack:
             return None
 
     def receive_data(self, player):
+        """This function receive data/msg from the clients directed to the server.
+        
+        Args:
+            conn (socket): socket object usable to send and receive data/msg
+
+        Returns:
+            string: The data/msg received from the client or raises an error if Failed to receive data
+        """
         msg_length = player.conn.recv(HEADER).decode(FORMAT)
         if msg_length:
             msg_length = int(msg_length)
