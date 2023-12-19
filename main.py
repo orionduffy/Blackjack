@@ -47,6 +47,15 @@ def main():
 
 
 def validate_IP(ip):
+    """This function validate if the input text is valid ip address.
+    
+     Args:
+          ip (String): input text
+
+    Returns:
+            boolean: True if input ip is valid else it return a string to notify input ip is not valid.
+
+    """
     if len(ip) > 0:
         ip.strip()
 
