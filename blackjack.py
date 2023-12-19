@@ -9,7 +9,7 @@ from colorama import Fore, Style
 class Blackjack:
     """This class Blackjack game class for single player."""
     def __init__(self):
-        """This function initialize the player money to $100 and set the environment ready to start game."""
+        """This function initializes the player money to $100 and sets the environment up to start game."""
         self.player_money: int = 100
         self.min_bet: int = 5
 
@@ -24,8 +24,8 @@ class Blackjack:
         """
         This function get the betting amount from player before every game \
         started and calls the run_round function to handle the action of \
-        player in every round. After single game is over, it adds or reducts the \
-        won/loss amount to player's money. The Game re-runs till the players quits.
+        player in every round. After single game is over, it adds or subtracts the \
+        won/loss amount to/from player's money. The Game re-runs till the players quits.
         """
 
         choices = ["Continue", "Quit"]
@@ -180,7 +180,8 @@ class Blackjack:
 
     # Handles the text validation when a user attempts to make a bet
     def validate_bet(self, text):
-        """This function checks the input data provided to see if the player has sufficient money for the bet.
+        """
+        This function checks the input data provided to see if the player has sufficient money for the bet.
     
         Args:
             text (String): input text

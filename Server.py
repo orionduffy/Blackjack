@@ -3,6 +3,7 @@ import socket
 import threading
 from Server_blackjack import Blackjack
 from Server_Player_Info import Player
+from utils import *
 import logging
 # The idea to use input timeouts was gained from professor Jamal Bouajjaj
 from inputimeout import inputimeout, TimeoutOccurred
@@ -10,23 +11,6 @@ from inputimeout import inputimeout, TimeoutOccurred
 # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
 from colorama import init as colorama_init
 from colorama import Fore, Style
-
-# Much of the socket code is copied partly or fully from https://youtu.be/3QiPPX-KeSc?si=wLAnYlhsHv2Fuqry
-
-
-HEADER = 64
-PORT = 5050
-# SERVER = "172.19.93.54"
-# SERVER = socket.gethostbyname(socket.gethostname())
-SERVER = ""
-ADDR = (SERVER, PORT)
-FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
-QUESTION_HEADER_CHOICE = "CHOOCE\n"
-QUESTION_HEADER_INPUT = "IINPUT\n"
-OUTPUT_HEADER = "OUTPUT\n"
-
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 def handle_clients(players_list):
@@ -131,6 +115,7 @@ def start():
     early_start function is also called in here if the early start of the game is needed.
     """
     server.bind(ADDR)
+    # Suggested by professor
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     server.listen()
@@ -226,11 +211,11 @@ def start():
 def early_start(should_start, players_list):
     """
     This function gives the ability to start the game early if needed by the server.
-    
+
     Args:
         should_start (list[boolean]): True if the game is need to start early, otherwise False\n
         players_list (list): List of Player objects waiting to the game start_game\n
-    
+
     No Return:
     """
     # should_start[0] = questionary \
@@ -290,14 +275,14 @@ def start_game(players_list, allow_rejoin, allow_new_joins, hard_cap):
 def try_send_data(player, msg, pre_game=False):
     """
     This function try to send data using the send_data function to player and the exceptions are handled here.
-    
+
     Args:
         player (Player): Player object to which the msg is going to be delivered\n
         msg (String): The message to be sent to the player\n
-        pre_game=False (boolean): used to specify the msg print position on the server terminal\n
-    
+        pre_game (boolean): used to specify the msg print position on the server terminal\n
+
     Returns:
-            boolean: True if succefully msg is sent, otherwise it return False
+            boolean: True if msg is successfully sent, otherwise it returns False
     """
     try:
         send_data(player.conn, msg)
@@ -312,42 +297,6 @@ def try_send_data(player, msg, pre_game=False):
             print_above(msg)
         player.connected = False
         return False
-
-
-def send_data(conn, msg):
-    """
-    This function encodes the msg and sends it to a player's conn information
-    
-    Args:
-        conn (Socket): socket object usable to send and receive data/msg\n
-        msg (String): The message to be sent to the player\n
-
-    No Return.
-    """
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    conn.sendall(send_length)
-    conn.sendall(message)
-
-
-def receive_data(conn):
-    """
-    This function receive data/msg from the clients directed to the server.
-    
-    Args:
-        conn (Socket): socket object usable to send and receive data/msg
-
-    Returns:
-           string: The data/msg received from the client or raises an error if Failed to receive data
-    """
-    msg_length = conn.recv(HEADER).decode(FORMAT)
-    if msg_length:
-        msg_length = int(msg_length)
-        msg = conn.recv(msg_length).decode(FORMAT)
-        return msg
-    raise socket.error(f"{Fore.RED}Failed to receive data{Style.RESET_ALL}")
 
 
 def validate_no_players(text):
@@ -365,29 +314,6 @@ def validate_no_players(text):
         return True
     except ValueError:
         return "Invalid input. Please enter a valid number."
-
-
-def print_above(msg, up_amount=1, newline_amount=1):
-    """
-    Based off https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input \n
-    Mostly copied from professor Jamal Bouajjaj
-
-    This does the following things, in order:
-        - save cursor position
-        - move cursor up one line at the start
-        - scroll up terminal by 1
-        - Add a new line (this command seems to be obscure?)
-        - print the message
-        - go back to saved position
-
-    Args:
-        msg (String): The message that needs to be printed
-        up_amount (int): The number of lines to move the cursor upwards
-        newline_amount (int): The number of newlines to add
-
-    No Return.
-    """
-    print(f"\x1b[s\x1b[{up_amount}F\x1b[S\x1b[{newline_amount}L" + msg + "\x1b[u", end="", flush=True)
 
 
 if __name__ == '__main__':
