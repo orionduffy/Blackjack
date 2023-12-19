@@ -59,7 +59,8 @@ def validate_IP(ip):
     """
     if len(ip) > 0:
         ip.strip()
-
+    if ip == "localhost":
+        return True
     ip_split = ip.split('.')
     if len(ip_split) == 4 and len(ip_split[0]) > 0 \
             and len(ip_split[1]) > 0 \

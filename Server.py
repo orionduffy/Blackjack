@@ -17,7 +17,8 @@ from colorama import Fore, Style
 HEADER = 64
 PORT = 5050
 # SERVER = "172.19.93.54"
-SERVER = socket.gethostbyname(socket.gethostname())
+# SERVER = socket.gethostbyname(socket.gethostname())
+SERVER = ""
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
@@ -26,7 +27,6 @@ QUESTION_HEADER_INPUT = "IINPUT\n"
 OUTPUT_HEADER = "OUTPUT\n"
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(ADDR)
 
 
 def handle_clients(players_list):
@@ -130,8 +130,15 @@ def start():
     it calls the start_game function to start game. \
     early_start function is also called in here if the early start of the game is needed.
     """
+    server.bind(ADDR)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
     server.listen()
-    print(f"[LISTENING] Server is listening on {SERVER}")
+    print(f"[LISTENING] Server is listening on all available addresses")
+    print(f"Players on the same computer can connect using localhost or 127.0.0.1")
+    print(f"Players on the same network can connect using {socket.gethostbyname(socket.gethostname())}")
+    print(f"Players on other networks can connect using the ip given by searching \"what is my ip\" on Google")
+
     players_list = []
     no_players = int(questionary.text("How many players are you expecting?", validate=validate_no_players).ask())
 
