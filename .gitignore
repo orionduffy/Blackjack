@@ -9,7 +9,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
-!docs/_build
+!Blackjack/docs/_build/
+
 develop-eggs/
 dist/
 downloads/
