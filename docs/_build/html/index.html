@@ -164,9 +164,9 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="Server.early_start">
 <span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">early_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">should_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">players_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.early_start" title="Link to this definition">¶</a></dt>
-<dd><p>This function gives the ability of early staring the game if needed by the server.</p>
+<dd><p>This function gives the ability to start the game early if needed by the server.</p>
 <dl>
-<dt>Args:</dt><dd><p>should_start (boolean): True if the game is need to start early, otherwise False</p>
+<dt>Args:</dt><dd><p>should_start (list[boolean]): True if the game is need to start early, otherwise False</p>
 <p>players_list (list): List of Player objects waiting to the game start_game</p>
 </dd>
 </dl>
@@ -176,7 +176,8 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="Server.handle_clients">
 <span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">handle_clients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">players_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.handle_clients" title="Link to this definition">¶</a></dt>
-<dd><p>“”This function starts the Blackjack game with list of players and gracefully closes the connection of players after the game is over.</p>
+<dd><p>“”
+This function starts the Blackjack game with the list of players     and gracefully closes the connection of players after the game is over.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>players_list (list): List of Player objects which reprsents every players</p>
 </dd>
@@ -185,13 +186,14 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Server.handle_late_connections">
-<span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">handle_late_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">game_thread</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">players_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_rejoins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_new_joins</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.handle_late_connections" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">handle_late_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">game_thread</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">players_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_rejoins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_new_joins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.handle_late_connections" title="Link to this definition">¶</a></dt>
 <dd><p>This function handles players who joined the lobby after the blackjack game is started.</p>
 <dl>
 <dt>Args:</dt><dd><p>game_thread (Thread): Current thread of the ongoing game</p>
 <p>players_list (list): List of Player objects playing the current game</p>
 <p>allow_rejoins (boolean): True if rejoins are allowed after player got disconneted for any reason otherwise False</p>
 <p>allow_new_joins (boolean): True if new players are allowed to join the game after it has started otherwise False</p>
+<p>hard_cap (int | boolean): The maximum number of players allowed, or False if there is no hard cap</p>
 </dd>
 </dl>
 <p>No Returns:</p>
@@ -200,10 +202,10 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="Server.print_above">
 <span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">print_above</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up_amount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline_amount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.print_above" title="Link to this definition">¶</a></dt>
-<dd><p>Based off <a class="reference external" href="https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input">https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input</a>
-Mostly copied from professor Jamal Bouajjaj</p>
+<dd><p>Based off <a class="reference external" href="https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input">https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input</a></p>
+<p>Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="simple">
-<dt>This does the following codes, in order:</dt><dd><ul class="simple">
+<dt>This does the following things, in order:</dt><dd><ul class="simple">
 <li><p>save cursor position</p></li>
 <li><p>move cursor up one line at the start</p></li>
 <li><p>scroll up terminal by 1</p></li>
@@ -212,7 +214,12 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <li><p>go back to saved position</p></li>
 </ul>
 </dd>
+<dt>Args:</dt><dd><p>msg (String): The message that needs to be printed
+up_amount (int): The number of lines to move the cursor upwards
+newline_amount (int): The number of newlines to add</p>
+</dd>
 </dl>
+<p>No Return.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -220,7 +227,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">receive_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.receive_data" title="Link to this definition">¶</a></dt>
 <dd><p>This function receive data/msg from the clients directed to the server.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>conn (socket): socket object usable to send and receive data/msg</p>
+<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data/msg</p>
 </dd>
 <dt>Returns:</dt><dd><p>string: The data/msg received from the client or raises an error if Failed to receive data</p>
 </dd>
@@ -230,9 +237,9 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Server.send_data">
 <span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">send_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.send_data" title="Link to this definition">¶</a></dt>
-<dd><p>This function encode the msg and send it to a player’s conn information</p>
+<dd><p>This function encodes the msg and sends it to a player’s conn information</p>
 <dl>
-<dt>Args:</dt><dd><p>conn (socket): socket object usable to send and receive data/msg</p>
+<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data/msg</p>
 <p>msg (String): The message to be sent to the player</p>
 </dd>
 </dl>
@@ -242,17 +249,19 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Server.start">
 <span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Server.start" title="Link to this definition">¶</a></dt>
-<dd><p>This function initiate the server to listen and after players are joined, it call the start_game function to start game. early_start function is also called in here if the early start of the game is needed.</p>
+<dd><p>This function initiates the server to listen and after players are joined,
+it calls the start_game function to start game.     early_start function is also called in here if the early start of the game is needed.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Server.start_game">
-<span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">start_game</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">players_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_rejoin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_new_joins</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.start_game" title="Link to this definition">¶</a></dt>
-<dd><p>This function start the handl_clients and handle_late_connections threads and shutdown the server after the game is over and the players are gracefully disconneted.</p>
+<span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">start_game</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">players_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_rejoin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_new_joins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_cap</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.start_game" title="Link to this definition">¶</a></dt>
+<dd><p>This function start the handle_clients and handle_late_connections threads     and shuts down the server after the game is over and the players are gracefully disconnected.</p>
 <dl>
 <dt>Args:</dt><dd><p>players_list (list): List of Player objects waiting for the game to start</p>
-<p>allow_rejoins (boolean): True if rejoins are allowed after player got disconneted for any reason otherwise False</p>
+<p>allow_rejoin (boolean): True if rejoins are allowed after player got disconnected for any reason otherwise False</p>
 <p>allow_new_joins (boolean): True if new players are allowed to join the game after it has started otherwise False</p>
+<p>hard_cap (int | boolean): The maximum number of players allowed, or False if there is no hard cap</p>
 </dd>
 </dl>
 <p>No Return</p>
@@ -300,7 +309,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.broadcast">
 <span class="sig-name descname"><span class="pre">broadcast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.broadcast" title="Link to this definition">¶</a></dt>
-<dd><p>This function sends broadcast message to all players.</p>
+<dd><p>This function sends a broadcast message to all players.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>message_type (String): one of these values [“score_board”, “turn_action”, “continue_quit”, “bet_amount”]</p>
 </dd>
@@ -310,7 +319,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.game_end">
 <span class="sig-name descname"><span class="pre">game_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">choices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.game_end" title="Link to this definition">¶</a></dt>
-<dd><p>This function check if a player won/lost after the game is over and calculates the mulitpliers amount for every player.</p>
+<dd><p>This function check if a player won/lost after the game is over         and calculates the multipliers amount for every player.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>choices (list): List of option a player can choose in every round.</p>
 </dd>
@@ -326,7 +335,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>player (Player): object of Player class</p>
 </dd>
-<dt>Returns:</dt><dd><p>boolean: True if sending the data was sucessful else False</p>
+<dt>Returns:</dt><dd><p>boolean: True if sending the data was successful else False</p>
 </dd>
 </dl>
 </dd></dl>
@@ -334,7 +343,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.print_player_info">
 <span class="sig-name descname"><span class="pre">print_player_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.print_player_info" title="Link to this definition">¶</a></dt>
-<dd><p>This function sends the players’ current game info to the client.</p>
+<dd><p>This function sends the player’s current game info to the client.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>player (Player): object of Player class</p>
 </dd>
@@ -345,10 +354,10 @@ Mostly copied from professor Jamal Bouajjaj</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.receive_data">
-<span class="sig-name descname"><span class="pre">receive_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.receive_data" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">receive_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.receive_data" title="Link to this definition">¶</a></dt>
 <dd><p>This function receive data/msg from the clients directed to the server.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>conn (socket): socket object usable to send and receive data/msg</p>
+<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data/msg</p>
 </dd>
 <dt>Returns:</dt><dd><p>string: The data/msg received from the client or raises an error if Failed to receive data</p>
 </dd>
@@ -364,27 +373,27 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.reset_game">
 <span class="sig-name descname"><span class="pre">reset_game</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.reset_game" title="Link to this definition">¶</a></dt>
-<dd><p>This function reset some game variables before new game is started.</p>
+<dd><p>This function resets some game variables before new game is started.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.run" title="Link to this definition">¶</a></dt>
-<dd><p>This function get the betting amount from every player before every game             started and calls the run_round function to handle the action of every             player in every round. After single game is over, it adds or reducts the             won/loss amount to every player’s money. The Game re-runs till the active players is 0.</p>
+<dd><p>This function get the betting amount from every player before every game         started and calls the run_round function to handle the action of every         player in every round. After single game is over, it adds or reduces the         won/loss amount to every player’s money. The Game re-runs till the active players is 0.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.run_round">
 <span class="sig-name descname"><span class="pre">run_round</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.run_round" title="Link to this definition">¶</a></dt>
-<dd><p>This function handles the actions of every players done after each round and do the necessary action based on that.</p>
+<dd><p>This function handles the actions of every players done after each round         and does the necessary action based on that.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.send_data">
-<span class="sig-name descname"><span class="pre">send_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.send_data" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">send_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.send_data" title="Link to this definition">¶</a></dt>
 <dd><p>This function encode the msg and send it to a player’s conn information</p>
 <dl>
-<dt>Args:</dt><dd><p>conn (socket): socket object usable to send and receive data/msg</p>
+<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data/msg</p>
 <p>msg (String): The message to be sent to the player</p>
 </dd>
 </dl>
@@ -394,7 +403,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.thread1">
 <span class="sig-name descname"><span class="pre">thread1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.thread1" title="Link to this definition">¶</a></dt>
-<dd><p>This function get the current game betting amount and handles the exception if error occured.</p>
+<dd><p>This function get the current game betting amount and handles the exception if error occurred.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>player (Player): object of Player class</p>
 </dd>
@@ -428,7 +437,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.try_receive_data">
 <span class="sig-name descname"><span class="pre">try_receive_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.try_receive_data" title="Link to this definition">¶</a></dt>
-<dd><p>This function try to receive data/msg using the receive_data function from player and the exceptions are handled here.</p>
+<dd><p>This function tries to receive data or a message using the receive_data function         from the player and the exceptions are handled here.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>player (Player): Player object to which the msg is going to be delivered to</p>
 </dd>
@@ -440,7 +449,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.try_send_data">
 <span class="sig-name descname"><span class="pre">try_send_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">player</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.try_send_data" title="Link to this definition">¶</a></dt>
-<dd><p>This function try to send data/msg using the send_data function to player and the exceptions are handled here.</p>
+<dd><p>This function tries to send data/msg using the send_data function to player and the exceptions are handled here.</p>
 <dl>
 <dt>Args:</dt><dd><p>player (Player): Player object to which the msg is going to be delivered to</p>
 <p>msg (String): The message to be sent to the player</p>
@@ -468,7 +477,8 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="blackjack.Blackjack.game_end">
 <span class="sig-name descname"><span class="pre">game_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">special</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blackjack.Blackjack.game_end" title="Link to this definition">¶</a></dt>
-<dd><p>This function check if a player won/lost after the game is over and calculates the bet mulitplier amount for the player.</p>
+<dd><p>This function checks if a player won/lost after the game is over
+and calculates the bet multiplier amount for the player.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>special (int, default=0): index of choice of player from the choice provided</p>
 </dd>
@@ -486,19 +496,20 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="blackjack.Blackjack.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#blackjack.Blackjack.run" title="Link to this definition">¶</a></dt>
-<dd><p>This function get the betting amount from player before every game             started and calls the run_round function to handle the action of             player in every round. After single game is over, it adds or reducts the             won/loss amount to player’s money. The Game re-runs till the players quits.</p>
+<dd><p>This function get the betting amount from player before every game         started and calls the run_round function to handle the action of         player in every round. After single game is over, it adds or reducts the         won/loss amount to player’s money. The Game re-runs till the players quits.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blackjack.Blackjack.run_round">
 <span class="sig-name descname"><span class="pre">run_round</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#blackjack.Blackjack.run_round" title="Link to this definition">¶</a></dt>
-<dd><p>This function handles the actions of a players done after each round and do the necessary action based on that.</p>
+<dd><p>This function handles the actions of a players done after each round
+and does the necessary action based on that.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="blackjack.Blackjack.validate_bet">
 <span class="sig-name descname"><span class="pre">validate_bet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blackjack.Blackjack.validate_bet" title="Link to this definition">¶</a></dt>
-<dd><p>This function validated the input data provided if it the player have sufficient amount for the bet.</p>
+<dd><p>This function checks the input data provided to see if the player has sufficient money for the bet.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>text (String): input text</p>
 </dd>
@@ -514,14 +525,14 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <h2>Blackjack.Server_Player_Info module<a class="headerlink" href="#blackjack-server-player-info-module" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="Server_Player_Info.Player">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Server_Player_Info.</span></span><span class="sig-name descname"><span class="pre">Player</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mid_join</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_Player_Info.Player" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Server_Player_Info.</span></span><span class="sig-name descname"><span class="pre">Player</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pindex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mid_join</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_Player_Info.Player" title="Link to this definition">¶</a></dt>
 <dd><p>This class holds information about the player is maintained by the server class.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_Player_Info.Player.handle_mid_join">
 <span class="sig-name descname"><span class="pre">handle_mid_join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_Player_Info.Player.handle_mid_join" title="Link to this definition">¶</a></dt>
 <dd><p>This function handles player joined after game started.</p>
 <dl class="simple">
-<dt>Args:</dt><dd><p>conn (socket): socket object usable to send and receive data</p>
+<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data</p>
 </dd>
 </dl>
 </dd></dl>
@@ -535,7 +546,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_Player_Info.Player.rejoin_game">
 <span class="sig-name descname"><span class="pre">rejoin_game</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Server_Player_Info.Player.rejoin_game" title="Link to this definition">¶</a></dt>
-<dd><p>This function make the newly joined player active and will be able to play in the next game.</p>
+<dd><p>This function makes the rejoined player active, and they will be able to play in the next game.</p>
 </dd></dl>
 
 </dd></dl>
@@ -617,11 +628,12 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deck.Deck">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">deck.</span></span><span class="sig-name descname"><span class="pre">Deck</span></span><a class="headerlink" href="#deck.Deck" title="Link to this definition">¶</a></dt>
-<dd><p>This class represents the deck of card which will be used in the Blackjack game.</p>
+<dd><p>This class represents the deck of cards which will be used in the Blackjack game.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="deck.Deck.shuffle_deck">
 <span class="sig-name descname"><span class="pre">shuffle_deck</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#deck.Deck.shuffle_deck" title="Link to this definition">¶</a></dt>
-<dd><p>This function shuffle the deck of cards and insert the element of randomnes into the order of the deck of cards.</p>
+<dd><p>This function shuffles the deck of cards
+and insert the element of randomness into the order of the deck of cards.</p>
 <dl class="simple">
 <dt>Returns:</dt><dd><p>list of string: list of the keys to the deck of cards</p>
 </dd>
@@ -653,7 +665,7 @@ Mostly copied from professor Jamal Bouajjaj</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="main.validate_IP">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">validate_IP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ip</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#main.validate_IP" title="Link to this definition">¶</a></dt>
-<dd><p>This function validate if the input text is valid ip address.</p>
+<dd><p>This function checks if the input text is a valid ip address.</p>
 <blockquote>
 <div><dl class="simple">
 <dt>Args:</dt><dd><p>ip (String): input text</p>

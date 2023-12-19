@@ -3,11 +3,13 @@ class Player:
     """This class holds information about the player is maintained by the server class."""
 
     def __init__(self, pname, pindex, connection, address, mid_join=False):
-        """This __init__function initialize the Player objects.
+        """
+        This __init__ function initializes the Player objects.
 
         Args:
             pname (String): Player Name\n
-            connection (socket): socket object usable to send and receive data\n
+            pindex (String): Player Name\n
+            connection (Socket): socket object usable to send and receive data\n
             address (socket address): the address bound to the socket on the other end of the connection\n
             mid_join (boolean, default=False): if player is joining after the game is started\n
 
@@ -36,10 +38,11 @@ class Player:
         self.status = "Hit (Draw another card)"
 
     def handle_mid_join(self, conn):
-        """This function handles player joined after game started.
+        """
+        This function handles player joined after game started.
         
         Args:
-            conn (socket): socket object usable to send and receive data
+            conn (Socket): socket object usable to send and receive data
 
         """
         self.active = False
@@ -48,7 +51,7 @@ class Player:
         self.mid_join = True
 
     def rejoin_game(self):
-        """This function make the newly joined player active and will be able to play in the next game."""
+        """This function makes the rejoined player active, and they will be able to play in the next game."""
         self.initialize_new_game()
         self.active = True
         self.mid_join = False
