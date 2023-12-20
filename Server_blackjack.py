@@ -445,6 +445,7 @@ class Blackjack:
             board_data = "".rjust(30) + f"{Fore.GREEN}SCORE BOARD{Style.RESET_ALL}\n"
             board_data += "   Name".ljust(20) + "Total Money".ljust(20) + "Last Game win/loss Amt".center(20) + "\n"
             board_data += "\n".join(name_and_money) + "\n\n"
+            
             broadcast_messsage = OUTPUT_HEADER + board_data
 
             win_or_loss_amt={}
