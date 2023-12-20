@@ -423,7 +423,7 @@ class Blackjack:
 
         """
         def display_help(win_or_loss_amt, player):
-            res = (str(win_or_loss_amt[player]) if player in win_or_loss_amt else "not playing").ljust(20)
+            res = (str(int(win_or_loss_amt[player])) if player in win_or_loss_amt else "not playing").ljust(20)
             if res!="not playing         ":
                 if int(res)>=0:
                     return f"{Fore.GREEN} +{res}{Style.RESET_ALL}"
