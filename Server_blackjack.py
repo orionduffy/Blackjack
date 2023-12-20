@@ -419,7 +419,9 @@ class Blackjack:
         This function sends a broadcast message to all players.
         
         Args:
-            message_type (String): one of these values ["score_board", "turn_action", "continue_quit", "bet_amount"]
+            message_type (String): one of these values ["score_board", "turn_action", "continue_quit", "bet_amount"]\n
+            win_or_loss_amt (dict): An empty dict by default, \
+            which contains the player's win or loss amount at the end of each round\n
 
         """
         def display_help(win_or_loss_amt, player):
@@ -432,15 +434,15 @@ class Blackjack:
 
         if message_type == "score_board":
             # sorting players list according to thier final money amount
-            self.players_list.sort(key=lambda x: x.player_money, reverse=True)
+            sorted_players_list = self.players_list.copy()
+            sorted_players_list.sort(key=lambda x: x.player_money, reverse=True)
 
             name_and_money = [
-                str(p + 1) + ". " + self.players_list[p].name.ljust(20) + "$" + \
-                    str(self.players_list[p].player_money).ljust(20) + \
-                    display_help(win_or_loss_amt, self.players_list[p])
+                str(p + 1) + ". " + sorted_players_list[p].name.ljust(20) + "$" + \
+                    str(sorted_players_list[p].player_money).ljust(20) + \
+                    display_help(win_or_loss_amt, sorted_players_list[p])
                     
-                for p
-                in range(len(self.players_list))]
+                for p in range(len(sorted_players_list))]
 
             board_data = "".rjust(30) + f"{Fore.GREEN}SCORE BOARD{Style.RESET_ALL}\n"
             board_data += "   Name".ljust(20) + "Total Money".ljust(20) + "Last Game win/loss Amt".center(20) + "\n"
