@@ -63,6 +63,11 @@ def validate_IP(ip):
     if ip == "localhost":
         return True
     ip_split = ip.split('.')
+
+    for part in ip_split:
+        if not part.isdigit():
+            return "Please Enter Valid IP Server Address"
+
     if len(ip_split) == 4 and len(ip_split[0]) > 0 \
             and len(ip_split[1]) > 0 \
             and len(ip_split[2]) > 0 \
