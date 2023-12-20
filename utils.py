@@ -2,6 +2,10 @@
 from colorama import init as colorama_init
 from colorama import Fore, Style
 import socket
+import os
+
+# From https://stackoverflow.com/questions/2084508/clear-terminal-in-python
+os.system('cls' if os.name == 'nt' else 'clear')
 
 # Much of the socket code is copied partly or fully from https://youtu.be/3QiPPX-KeSc?si=wLAnYlhsHv2Fuqry
 HEADER = 64
@@ -12,7 +16,6 @@ QUESTION_HEADER_INPUT = "IINPUT\n"
 OUTPUT_HEADER = "OUTPUT\n"
 st = len(QUESTION_HEADER_CHOICE)
 
-
 PORT = 5050
 # SERVER = "172.19.93.54"
 # SERVER = socket.gethostbyname(socket.gethostname())
@@ -21,7 +24,9 @@ ADDR = (SERVER, PORT)
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-colorama_init()
+# Autoreset does not appear to work fully, so using Style.RESET_ALL is still necessary
+# However, it's an extra layer of security just in case, and afaik causes no problems
+colorama_init(autoreset=True)
 
 
 def print_above(msg, up_amount=1, newline_amount=1):
