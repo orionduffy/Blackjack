@@ -1,20 +1,10 @@
 import socket
 import questionary
 import logging
+from utils import *
 
-from colorama import init as colorama_init
-from colorama import Fore,Style
+from colorama import Fore, Style
 
-
-QUESTION_HEADER_CHOICE = "CHOOCE\n"
-st = len(QUESTION_HEADER_CHOICE)
-QUESTION_HEADER_INPUT = "IINPUT\n"
-OUTPUT_HEADER = "OUTPUT\n"
-DISCONNECT_MESSAGE = "!DISCONNECT"
-
-HEADER = 64
-PORT = 5050
-FORMAT = 'utf-8'
 
 class Player:
     def __init__(self, name, server_ip):

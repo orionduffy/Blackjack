@@ -4,11 +4,11 @@ import socket
 import questionary
 from blackjack import Blackjack
 from Player import Player
+from utils import *
 import re
 import logging
 
 # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
-from colorama import init as colorama_init
 from colorama import Fore, Style
 
 

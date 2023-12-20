@@ -259,15 +259,21 @@ class Blackjack:
             try:
                 self.bets[player.name] = int(bet_attempt)
 
+                if self.bets[player.name] > player.player_money:
+                    raise ValueError
+
                 self.try_send_data(player,
                                    f"{OUTPUT_HEADER}{Fore.YELLOW}${self.bets[player.name]} will be bet! "
                                    f"You have ${player.player_money - self.bets[player.name]} left in reserve! \n"
                                    f"Game Beginning!\n{Style.RESET_ALL}")
             except ValueError:
-                msg = f"{Fore.RED}Player {player.name}'s machine attempted to send an invalid input to the server.\n" \
+                msg = f"{Fore.RED}Player {player.name}'s machine at IP address {player.address} " \
+                      f"attempted to send an invalid bet to the server.\n" \
                       f"There may be a bug, or the player may have modified the program.{Style.RESET_ALL}"
                 logging.error(msg)
                 print(msg)
+
+                self.bets[player.name] = 0
 
     # handles the process of getting the player's turn choice and do the relevant action
     def thread2(self, player, first_round, choices):
@@ -419,11 +425,13 @@ class Blackjack:
         This function sends a broadcast message to all players.
         
         Args:
-            message_type (String): one of these values ["score_board", "turn_action", "continue_quit", "bet_amount"]
+            message_type (String): one of these values ["score_board", "turn_action", "continue_quit", "bet_amount"]\n
+            win_or_loss_amt (dict): An empty dict by default, \
+            which contains the player's win or loss amount at the end of each round\n
 
         """
         def display_help(win_or_loss_amt, player):
-            res = (str(win_or_loss_amt[player]) if player in win_or_loss_amt else "not playing").ljust(20)
+            res = (str(int(win_or_loss_amt[player])) if player in win_or_loss_amt else "not playing").ljust(20)
             if res!="not playing         ":
                 if int(res)>=0:
                     return f"{Fore.GREEN} +{res}{Style.RESET_ALL}"
@@ -432,15 +440,15 @@ class Blackjack:
 
         if message_type == "score_board":
             # sorting players list according to thier final money amount
-            self.players_list.sort(key=lambda x: x.player_money, reverse=True)
+            sorted_players_list = self.players_list.copy()
+            sorted_players_list.sort(key=lambda x: x.player_money, reverse=True)
 
             name_and_money = [
-                str(p + 1) + ". " + self.players_list[p].name.ljust(20) + "$" + \
-                    str(self.players_list[p].player_money).ljust(20) + \
-                    display_help(win_or_loss_amt, self.players_list[p])
+                str(p + 1) + ". " + sorted_players_list[p].name.ljust(20) + "$" + \
+                    str(sorted_players_list[p].player_money).ljust(20) + \
+                    display_help(win_or_loss_amt, sorted_players_list[p])
                     
-                for p
-                in range(len(self.players_list))]
+                for p in range(len(sorted_players_list))]
 
             board_data = "".rjust(30) + f"{Fore.GREEN}SCORE BOARD{Style.RESET_ALL}\n"
             board_data += "   Name".ljust(20) + "Total Money".ljust(20) + "Last Game win/loss Amt".center(20) + "\n"

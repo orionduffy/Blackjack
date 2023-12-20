@@ -48,9 +48,6 @@
 <li><a class="reference internal" href="#Server.early_start"><code class="docutils literal notranslate"><span class="pre">early_start()</span></code></a></li>
 <li><a class="reference internal" href="#Server.handle_clients"><code class="docutils literal notranslate"><span class="pre">handle_clients()</span></code></a></li>
 <li><a class="reference internal" href="#Server.handle_late_connections"><code class="docutils literal notranslate"><span class="pre">handle_late_connections()</span></code></a></li>
-<li><a class="reference internal" href="#Server.print_above"><code class="docutils literal notranslate"><span class="pre">print_above()</span></code></a></li>
-<li><a class="reference internal" href="#Server.receive_data"><code class="docutils literal notranslate"><span class="pre">receive_data()</span></code></a></li>
-<li><a class="reference internal" href="#Server.send_data"><code class="docutils literal notranslate"><span class="pre">send_data()</span></code></a></li>
 <li><a class="reference internal" href="#Server.start"><code class="docutils literal notranslate"><span class="pre">start()</span></code></a></li>
 <li><a class="reference internal" href="#Server.start_game"><code class="docutils literal notranslate"><span class="pre">start_game()</span></code></a></li>
 <li><a class="reference internal" href="#Server.try_send_data"><code class="docutils literal notranslate"><span class="pre">try_send_data()</span></code></a></li>
@@ -64,12 +61,10 @@
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.game_end"><code class="docutils literal notranslate"><span class="pre">Blackjack.game_end()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.print_dealer_info"><code class="docutils literal notranslate"><span class="pre">Blackjack.print_dealer_info()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.print_player_info"><code class="docutils literal notranslate"><span class="pre">Blackjack.print_player_info()</span></code></a></li>
-<li><a class="reference internal" href="#Server_blackjack.Blackjack.receive_data"><code class="docutils literal notranslate"><span class="pre">Blackjack.receive_data()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.refresh_player_lists"><code class="docutils literal notranslate"><span class="pre">Blackjack.refresh_player_lists()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.reset_game"><code class="docutils literal notranslate"><span class="pre">Blackjack.reset_game()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.run"><code class="docutils literal notranslate"><span class="pre">Blackjack.run()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.run_round"><code class="docutils literal notranslate"><span class="pre">Blackjack.run_round()</span></code></a></li>
-<li><a class="reference internal" href="#Server_blackjack.Blackjack.send_data"><code class="docutils literal notranslate"><span class="pre">Blackjack.send_data()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.thread1"><code class="docutils literal notranslate"><span class="pre">Blackjack.thread1()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.thread2"><code class="docutils literal notranslate"><span class="pre">Blackjack.thread2()</span></code></a></li>
 <li><a class="reference internal" href="#Server_blackjack.Blackjack.thread3"><code class="docutils literal notranslate"><span class="pre">Blackjack.thread3()</span></code></a></li>
@@ -200,53 +195,6 @@ This function starts the Blackjack game with the list of players     and gracefu
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="Server.print_above">
-<span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">print_above</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">up_amount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline_amount</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.print_above" title="Link to this definition">¶</a></dt>
-<dd><p>Based off <a class="reference external" href="https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input">https://stackoverflow.com/questions/73426135/python-how-to-print-to-the-console-while-typing-input</a></p>
-<p>Mostly copied from professor Jamal Bouajjaj</p>
-<dl class="simple">
-<dt>This does the following things, in order:</dt><dd><ul class="simple">
-<li><p>save cursor position</p></li>
-<li><p>move cursor up one line at the start</p></li>
-<li><p>scroll up terminal by 1</p></li>
-<li><p>Add a new line (this command seems to be obscure?)</p></li>
-<li><p>print the message</p></li>
-<li><p>go back to saved position</p></li>
-</ul>
-</dd>
-<dt>Args:</dt><dd><p>msg (String): The message that needs to be printed
-up_amount (int): The number of lines to move the cursor upwards
-newline_amount (int): The number of newlines to add</p>
-</dd>
-</dl>
-<p>No Return.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="Server.receive_data">
-<span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">receive_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.receive_data" title="Link to this definition">¶</a></dt>
-<dd><p>This function receive data/msg from the clients directed to the server.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data/msg</p>
-</dd>
-<dt>Returns:</dt><dd><p>string: The data/msg received from the client or raises an error if Failed to receive data</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="Server.send_data">
-<span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">send_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server.send_data" title="Link to this definition">¶</a></dt>
-<dd><p>This function encodes the msg and sends it to a player’s conn information</p>
-<dl>
-<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data/msg</p>
-<p>msg (String): The message to be sent to the player</p>
-</dd>
-</dl>
-<p>No Return.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="Server.start">
 <span class="sig-prename descclassname"><span class="pre">Server.</span></span><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Server.start" title="Link to this definition">¶</a></dt>
 <dd><p>This function initiates the server to listen and after players are joined,
@@ -274,9 +222,9 @@ it calls the start_game function to start game.     early_start function is also
 <dl>
 <dt>Args:</dt><dd><p>player (Player): Player object to which the msg is going to be delivered</p>
 <p>msg (String): The message to be sent to the player</p>
-<p>pre_game=False (boolean): used to specify the msg print position on the server terminal</p>
+<p>pre_game (boolean): used to specify the msg print position on the server terminal</p>
 </dd>
-<dt>Returns:</dt><dd><p>boolean: True if succefully msg is sent, otherwise it return False</p>
+<dt>Returns:</dt><dd><p>boolean: True if msg is successfully sent, otherwise it returns False</p>
 </dd>
 </dl>
 </dd></dl>
@@ -308,10 +256,11 @@ it calls the start_game function to start game.     early_start function is also
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.broadcast">
-<span class="sig-name descname"><span class="pre">broadcast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.broadcast" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">broadcast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">win_or_loss_amt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.broadcast" title="Link to this definition">¶</a></dt>
 <dd><p>This function sends a broadcast message to all players.</p>
-<dl class="simple">
+<dl>
 <dt>Args:</dt><dd><p>message_type (String): one of these values [“score_board”, “turn_action”, “continue_quit”, “bet_amount”]</p>
+<p>win_or_loss_amt (dict): An empty dict by default,             which contains the player’s win or loss amount at the end of each round</p>
 </dd>
 </dl>
 </dd></dl>
@@ -353,18 +302,6 @@ it calls the start_game function to start game.     early_start function is also
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Server_blackjack.Blackjack.receive_data">
-<span class="sig-name descname"><span class="pre">receive_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.receive_data" title="Link to this definition">¶</a></dt>
-<dd><p>This function receive data/msg from the clients directed to the server.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data/msg</p>
-</dd>
-<dt>Returns:</dt><dd><p>string: The data/msg received from the client or raises an error if Failed to receive data</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.refresh_player_lists">
 <span class="sig-name descname"><span class="pre">refresh_player_lists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.refresh_player_lists" title="Link to this definition">¶</a></dt>
 <dd><p>This function filters the players who are currently connected and those who want to continue playing.</p>
@@ -386,18 +323,6 @@ it calls the start_game function to start game.     early_start function is also
 <dt class="sig sig-object py" id="Server_blackjack.Blackjack.run_round">
 <span class="sig-name descname"><span class="pre">run_round</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.run_round" title="Link to this definition">¶</a></dt>
 <dd><p>This function handles the actions of every players done after each round         and does the necessary action based on that.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="Server_blackjack.Blackjack.send_data">
-<span class="sig-name descname"><span class="pre">send_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Server_blackjack.Blackjack.send_data" title="Link to this definition">¶</a></dt>
-<dd><p>This function encode the msg and send it to a player’s conn information</p>
-<dl>
-<dt>Args:</dt><dd><p>conn (Socket): socket object usable to send and receive data/msg</p>
-<p>msg (String): The message to be sent to the player</p>
-</dd>
-</dl>
-<p>No Return.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -454,7 +379,7 @@ it calls the start_game function to start game.     early_start function is also
 <dt>Args:</dt><dd><p>player (Player): Player object to which the msg is going to be delivered to</p>
 <p>msg (String): The message to be sent to the player</p>
 </dd>
-<dt>Returns:</dt><dd><p>boolean: True if succefully msg is sent, otherwise it return False</p>
+<dt>Returns:</dt><dd><p>boolean: True if msg is successfully sent, otherwise it returns False</p>
 </dd>
 </dl>
 </dd></dl>
@@ -496,7 +421,7 @@ and calculates the bet multiplier amount for the player.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="blackjack.Blackjack.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#blackjack.Blackjack.run" title="Link to this definition">¶</a></dt>
-<dd><p>This function get the betting amount from player before every game         started and calls the run_round function to handle the action of         player in every round. After single game is over, it adds or reducts the         won/loss amount to player’s money. The Game re-runs till the players quits.</p>
+<dd><p>This function get the betting amount from player before every game         started and calls the run_round function to handle the action of         player in every round. After single game is over, it adds or subtracts the         won/loss amount to/from player’s money. The Game re-runs till the players quits.</p>
 </dd></dl>
 
 <dl class="py method">
