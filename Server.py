@@ -310,10 +310,9 @@ def validate_no_players(text):
     Returns:
             boolean: True if text is digit else it return a string to notify text is not string.
     """
-    try:
-        int(text)
+    if text.isdigit():
         return True
-    except ValueError:
+    else:
         return "Invalid input. Please enter a valid number."
 
 

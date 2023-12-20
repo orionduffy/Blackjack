@@ -259,15 +259,21 @@ class Blackjack:
             try:
                 self.bets[player.name] = int(bet_attempt)
 
+                if self.bets[player.name] > player.player_money:
+                    raise ValueError
+
                 self.try_send_data(player,
                                    f"{OUTPUT_HEADER}{Fore.YELLOW}${self.bets[player.name]} will be bet! "
                                    f"You have ${player.player_money - self.bets[player.name]} left in reserve! \n"
                                    f"Game Beginning!\n{Style.RESET_ALL}")
             except ValueError:
-                msg = f"{Fore.RED}Player {player.name}'s machine attempted to send an invalid input to the server.\n" \
+                msg = f"{Fore.RED}Player {player.name}'s machine at IP address {player.address} " \
+                      f"attempted to send an invalid bet to the server.\n" \
                       f"There may be a bug, or the player may have modified the program.{Style.RESET_ALL}"
                 logging.error(msg)
                 print(msg)
+
+                self.bets[player.name] = 0
 
     # handles the process of getting the player's turn choice and do the relevant action
     def thread2(self, player, first_round, choices):
