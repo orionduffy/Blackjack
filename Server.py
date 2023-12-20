@@ -230,7 +230,8 @@ def early_start(should_start, players_list):
 
     while not should_start[0]:
         try:
-            inputimeout(f"\x1b[1F{msg}", timeout=1)
+            print("\x1b[1F", end="")
+            inputimeout(msg, timeout=1)
         except TimeoutOccurred:
             continue
 
