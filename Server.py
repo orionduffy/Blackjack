@@ -6,6 +6,7 @@ from Server_Player_Info import Player
 from utils import *
 import logging
 # The idea to use input timeouts was gained from professor Jamal Bouajjaj
+# The idea to use this library came from https://stackoverflow.com/questions/1335507/keyboard-input-with-timeout
 from inputimeout import inputimeout, TimeoutOccurred
 
 # https://stackoverflow.com/questions/287871/how-do-i-print-colored-text-to-the-terminal
@@ -303,7 +304,7 @@ def try_send_data(player, msg, pre_game=False):
 def validate_no_players(text):
     """
     This function validated the input data provided if it a number.
-    
+
     Args:
         text (String): input text
 
